@@ -30,10 +30,10 @@
 - `git mergetool` (quando configurado)
 
 ## Checklist de conclusão
-- [ ] Branch criada e push para remote
-- [ ] Pull Request aberto com descrição e checklist
-- [ ] Feedback incorporado no PR
-- [ ] PR mergeado ou fechado com justificativa
+- [x] Branch criada e push para remote
+- [x] Pull Request aberto com descrição e checklist
+- [x] Feedback incorporado no PR
+- [x] PR mergeado ou fechado com justificativa
 
 ## Recursos
 - Guia de Pull Requests: https://docs.github.com/en/pull-requests
