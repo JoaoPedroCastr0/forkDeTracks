@@ -15,3 +15,6 @@ uma melhoria
 um bug
 
 Tudo anotado oficialmente no GitHub, ligado ao repositório.
+
+Ao clicar em new Issue, e abrir uma, uma Issue ja foi feita com determinada funcionalidade. 
+
