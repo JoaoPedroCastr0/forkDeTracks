@@ -63,6 +63,13 @@ A primeira entrega e subir um servidor local com um endpoint de saude.
 - Editor de codigo com suporte a TypeScript.
 - Conhecimento basico de linha de comando.
 
+## Habito essencial: documentacao
+A partir daqui, o habito de conhecer e usar a documentacao oficial vira parte do seu dia a dia. Ela resolve duvidas mais rapido, evita achismo e ajuda a acompanhar mudancas da stack.
+
+Documentacoes que voce deve consultar sempre que surgir uma duvida:
+- https://expressjs.com/pt-br/
+- https://bun.com/docs
+
 ## Passo a passo (documentacao oficial + mentoria)
 Fonte: https://bun.com/docs/guides/ecosystem/express
 
@@ -83,6 +90,15 @@ bun --hot server.ts
 Valide no navegador com `http://localhost:3000/`.
 
 Exemplo de base (resumo do que voce deve criar):
+- Caminho do arquivo: `tracks/backend-bun-express/server.ts`
+```
+tracks/backend-bun-express/
+├── README.md
+├── package.json
+├── bun.lockb
+└── server.ts
+```
+
 
 ```ts
 import express from "express";
