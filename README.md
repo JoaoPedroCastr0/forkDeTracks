@@ -24,6 +24,7 @@ Usar JavaScript/TypeScript no frontend e no backend acelera a aprendizagem. Alin
 - Use scripts do Bun para rodar dev servers com hot reload.
 - Teste endpoints com fetch no frontend usando os mesmos tipos.
 
+
 ### Benefícios pedagógicos
 - Aprendizagem baseada em código real: implemente um endpoint e consuma-o com React.
 - Debug mais simples: logs e erros em TypeScript indicam onde ajustar tipos.
@@ -59,13 +60,7 @@ Links úteis:
 Roteiros detalhados por trilha:
 - Lógica de Programação - Java Script(base): [tracks/logic/README.md](tracks/logic/README.md)
 - Git & GitHub (base): [tracks/git/README.md](tracks/git/README.md)
-
-
-
-
-
-
-- TypeScript & Node.js (backend): [tracks/typescript-node/README.md](tracks/typescript-node/README.md)
+- Bun + Express (back-end): [tracks/backend-bun-express/README.md](tracks/backend-bun-express/README.md)
 - React & Frontend (frontend): [tracks/react/README.md](tracks/react/README.md)
 - Banco de Dados com Prisma (dados): [tracks/prisma/README.md](tracks/prisma/README.md)
 - Projeto Integrado (fullstack): [tracks/fullstack-project/README.md](tracks/fullstack-project/README.md)
