@@ -73,11 +73,11 @@
 - Para cada commit: usar mensagens claras e explicar no corpo do commit (quando necessário) o que foi aprendido.
 
 ## Checklist de conclusão
-- [ ] Identity configurada (`git config --list`)
-- [ ] Chave SSH criada e validada (`ssh -T git@github.com`)
-- [ ] Repositório local inicializado com 5 commits
-- [ ] Repositório publicado no GitHub (`git push -u origin main`)
-- [ ] README com um breve relatório do que foi aprendido
+- [ x ] Identity configurada (`git config --list`)
+- [ x ] Chave SSH criada e validada (`ssh -T git@github.com`)
+- [ x ] Repositório local inicializado com 5 commits
+- [ x ] Repositório publicado no GitHub (`git push -u origin main`)
+- [ x ] README com um breve relatório do que foi aprendido
 
 ## Verificação rápida (comandos sugeridos)
 - `git --version`
