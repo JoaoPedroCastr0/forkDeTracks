@@ -7,7 +7,8 @@ if(!PORT && !HOST){
 	process.exit(1);
 } else {
 	app.listen({
-		hostname:HOST,port:PORT
+		hostname:HOST,
+		port:PORT
 	})
 	console.log(`server is running on http://${HOST}:${PORT}`);
 }
