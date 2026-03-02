@@ -1,5 +1,5 @@
 /node_modules/
-
 /Aprendizado/Aprendendo_API/.env
 /Aprendizado/Aprendendo_API/node_modules 
 /tracks/backend-bun-express/node_modules
+/tracks/backend-bun-express/my-app/node_modules

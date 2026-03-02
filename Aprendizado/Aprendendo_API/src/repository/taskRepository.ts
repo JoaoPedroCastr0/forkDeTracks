@@ -1,16 +1,23 @@
 import type { Task } from "../models/task";
+import type { CreateTaskDTO } from "../DTOs/createTaskDTO.schema";
 
-let tasks: Task[] = [];
-let currentId = 1;
+
+
 
 export class TaskRepository {
-  create(title: string): Task {
-    const task: Task = {
-      id: currentId++,
-      title,
-    };
 
-    tasks.push(task);
-    return task;
-  }
+  private tasks: Task[] = [];
+  private currentId = 1;
+
+create({ title, description, priority }: CreateTaskDTO): Task {
+  const task: Task = {
+    id: this.currentId++,
+    title,
+    description,
+    priority
+  };
+
+  this.tasks.push(task);
+  return task;
+ }
 }

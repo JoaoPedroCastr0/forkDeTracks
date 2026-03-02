@@ -1,13 +1,10 @@
 import { TaskRepository } from "../repository/taskRepository";
+import type { CreateTaskDTO } from "../DTOs/createTaskDTO.schema";
 
 export class TaskService {
-  private repository = new TaskRepository();
+  constructor(private repository: TaskRepository) {}
 
-  Verificacao(title: string) {
-    if (typeof title !== "string" || title.trim() === "") {
-  throw new Error("Não aceita vazio, somente strings");
-}
-
-    return this.repository.create(title);
+  create(data: CreateTaskDTO) {
+    return this.repository.create(data);
   }
 }
