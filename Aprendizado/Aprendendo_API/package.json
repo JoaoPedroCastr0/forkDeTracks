@@ -4,11 +4,13 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start:dev": "bun --hot src/server.ts"
+    "start:dev": "bun --hot src/server.ts",
+    "lint": "eslint ."
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/express": "^5.0.6",
-    "@types/bun": "latest"
+    "eslint": "^10.0.2"
   },
   "peerDependencies": {
     "typescript": "^5"

@@ -1,6 +1,7 @@
 import express from "express";
-import { TaskController } from "../controllers/taskController";
 import { HealthController } from "../controllers/healthController";
+import { TaskController } from "../controllers/taskController";
+
 
 export const router = express.Router();
 
