@@ -1,14 +1,12 @@
-import {app} from "./app";
+import { app } from "./app";
+import "dotenv/config";
 
-const PORT = Bun.env.PORT
-const HOST = Bun.env.HOST
+const PORT = Number(process.env.PORT) || 4000;
+const HOST = process.env.HOST || "localhost";
 
-if(!PORT && !HOST){
-	process.exit(1);
-} else {
-	app.listen({
-		hostname:HOST,
-		port:PORT
-	})
-	console.log(`server is running on http://${HOST}:${PORT}`);
-}
+app.listen({
+  hostname: HOST,
+  port: PORT,
+});
+
+console.log(`server is running on http://${HOST}:${PORT}`);

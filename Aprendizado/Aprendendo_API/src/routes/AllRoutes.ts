@@ -1,18 +1,14 @@
-import express from "express";
-import { HealthController } from "../controllers/healthController";
-import { TaskController } from "../controllers/taskController";
+import { Router } from "express";
+import { register } from "../controllers/userController";
+import { login } from "../controllers/loginController";
+const router = Router();
+export default router;
 
 
-export const router = express.Router();
+//Rotas de login 
 
-const healthController = new HealthController();
-router.get("/health", (req, res) => healthController.check(req, res));
+router.post("/register", register);
 
-
-const taskController = new TaskController();
-router.post("/tasks", (req, res) => taskController.create(req, res));
-
-
-
+router.post("/login", login);
 
 

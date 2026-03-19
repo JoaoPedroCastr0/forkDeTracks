@@ -1,21 +1,29 @@
 {
-  "name": "backend",
+  "name": "api-condominio",
+  "version": "1.0.0",
   "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
     "start:dev": "bun --hot src/server.ts",
+    "dev": "bun run src/server.ts",
+    "start": "bun run src/server.ts",
     "lint": "eslint ."
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.19.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
     "eslint": "^10.0.2",
     "typescript": "^5"
-  },
-  "dependencies": {
-    "express": "^5.2.1",
-    "zod": "^4.3.6"
   }
 }
