@@ -1,6 +1,8 @@
 import * as userRepository from "../repository/userRepository";
 import jwt from "jsonwebtoken";
-import type { LoginDTO } from "../schemas/userSchema";
+import type { LoginDTO } from "../schemas/authSchema";
+import { AppError } from "../utils/AppError";
+
 
 export async function loginUser(data: LoginDTO) {
   const users = await userRepository.findUserByEmail(data.email);
@@ -9,7 +11,7 @@ export async function loginUser(data: LoginDTO) {
 
   // 🔹 valida usuário
   if (!user) {
-    throw new Error("Usuário não encontrado");
+    throw new AppError("Usuário não encontrado");
   }
 
   // 🔹 verifica senha
@@ -19,13 +21,13 @@ export async function loginUser(data: LoginDTO) {
   );
 
   if (!isValid) {
-    throw new Error("Senha inválida");
+    throw new AppError("Senha inválida");
   }
 
   // 🔹 valida secret ANTES
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    throw new Error("JWT_SECRET não definido");
+    throw new AppError("JWT_SECRET não definido");
   }
 
   // 🔹 gera token

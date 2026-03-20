@@ -1,14 +1,20 @@
 import { Router } from "express";
 import { register } from "../controllers/userController";
 import { login } from "../controllers/loginController";
-const router = Router();
-export default router;
+import { authMiddleware } from "../middlewares/auth.middleware";
+import {
+  createTask,
+  listTasks
+} from "../controllers/taskController";
 
+const routes = Router();
 
-//Rotas de login 
+export default routes;
 
-router.post("/register", register);
+// 🔓 Públicas
+routes.post("/register", register);
+routes.post("/login", login);
 
-router.post("/login", login);
-
-
+// 🔐 Protegidas
+routes.post("/tasks", authMiddleware, createTask);
+routes.get("/tasks", authMiddleware, listTasks);
