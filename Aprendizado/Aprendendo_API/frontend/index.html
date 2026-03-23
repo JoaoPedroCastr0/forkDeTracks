@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini App Tasks</title>
+</head>
+<body>
+
+  <h1>Auth</h1>
+
+  <input id="nome" placeholder="Nome">
+  <input id="email" placeholder="Email">
+  <input id="password" placeholder="Senha" type="password">
+
+  <button onclick="register()">Registrar</button>
+  <button onclick="login()">Login</button>
+
+  <hr>
+
+  <h1>Tarefas</h1>
+
+  <input id="taskInput" placeholder="Nova tarefa">
+  <button onclick="createTask()">Criar tarefa</button>
+
+  <ul id="taskList"></ul>
+
+  <script src="app.js"></script>
+</body>
+</html>
