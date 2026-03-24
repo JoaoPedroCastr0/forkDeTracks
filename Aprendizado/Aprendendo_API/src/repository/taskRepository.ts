@@ -21,3 +21,14 @@ export async function getTasksByUser(userId: number) {
 
   return rows;
 }
+
+export async function deleteTask(id: number) {
+  await db.query("DELETE FROM tasks WHERE id = ?", [id]);
+}
+
+export async function updateTask(id: number, title: string) {
+  await db.query(
+    "UPDATE tasks SET title = ? WHERE id = ?",
+    [title, id]
+  );
+}

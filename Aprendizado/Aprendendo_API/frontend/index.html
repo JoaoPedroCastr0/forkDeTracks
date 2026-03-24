@@ -2,28 +2,43 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Mini App Tasks</title>
+  <title>Task App</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Auth</h1>
+  <div class="container">
 
-  <input id="nome" placeholder="Nome">
-  <input id="email" placeholder="Email">
-  <input id="password" placeholder="Senha" type="password">
+    <h1>Task Manager</h1>
 
-  <button onclick="register()">Registrar</button>
-  <button onclick="login()">Login</button>
+    <!-- AUTH -->
+    <div class="card">
+      <h2>Autenticação</h2>
 
-  <hr>
+      <input id="nome" placeholder="Nome">
+      <input id="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Senha">
 
-  <h1>Tarefas</h1>
+      <div class="actions">
+        <button onclick="register()">Registrar</button>
+        <button onclick="login()" class="primary">Login</button>
+      </div>
+    </div>
 
-  <input id="taskInput" placeholder="Nova tarefa">
-  <button onclick="createTask()">Criar tarefa</button>
+    <!-- TASKS -->
+    <div class="card">
+      <h2>Minhas Tarefas</h2>
 
-  <ul id="taskList"></ul>
+      <div class="task-input">
+        <input id="taskInput" placeholder="Nova tarefa">
+        <button onclick="createTask()" class="primary">Criar</button>
+      </div>
 
-  <script src="app.js"></script>
+      <ul id="taskList"></ul>
+    </div>
+
+  </div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

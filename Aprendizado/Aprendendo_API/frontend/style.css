@@ -1,0 +1,96 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  margin-bottom: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #334155;
+  color: white;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #475569;
+}
+
+button.primary {
+  background: #3b82f6;
+}
+
+button.primary:hover {
+  background: #2563eb;
+}
+
+.task-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#taskList {
+  list-style: none;
+}
+
+#taskList li {
+  background: #334155;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#taskList li button {
+  margin-left: 5px;
+}
