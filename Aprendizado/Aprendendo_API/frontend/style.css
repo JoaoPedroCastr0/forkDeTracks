@@ -94,3 +94,7 @@ button.primary:hover {
 #taskList li button {
   margin-left: 5px;
 }
+
+#appSection {
+  display: none;
+}

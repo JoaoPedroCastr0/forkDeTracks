@@ -1,3 +1,4 @@
+
 const API = "http://localhost:4000";
 
 export function getToken() {
@@ -15,7 +16,16 @@ export async function loginRequest(email, password) {
     body: JSON.stringify({ email, password })
   });
 
-  return res.json();
+  const data = await res.json();
+
+  return {
+    status: res.status,
+    data
+  };
+}
+
+export function logout() {
+  localStorage.removeItem("token");
 }
 
 export async function getTasksRequest() {
@@ -33,7 +43,7 @@ export async function createTaskRequest(title) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`
+    Authorization: `Bearer ${getToken()}`
     },
     body: JSON.stringify({ title })
   });

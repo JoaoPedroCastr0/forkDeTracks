@@ -12,30 +12,33 @@
     <h1>Task Manager</h1>
 
     <!-- AUTH -->
-    <div class="card">
-      <h2>Autenticação</h2>
+    <!-- AUTH -->
+<div class="card" id="authSection">
+  <h2>Autenticação</h2>
 
-      <input id="nome" placeholder="Nome">
-      <input id="email" placeholder="Email">
-      <input id="password" type="password" placeholder="Senha">
+  <input id="nome" placeholder="Nome">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Senha">
 
-      <div class="actions">
-        <button onclick="register()">Registrar</button>
-        <button onclick="login()" class="primary">Login</button>
-      </div>
-    </div>
+  <div class="actions">
+    <button onclick="register()">Registrar</button>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
 
-    <!-- TASKS -->
-    <div class="card">
-      <h2>Minhas Tarefas</h2>
+<!-- TASKS -->
+<div class="card" id="appSection">
+  <h2>Minhas Tarefas</h2>
 
-      <div class="task-input">
-        <input id="taskInput" placeholder="Nova tarefa">
-        <button onclick="createTask()" class="primary">Criar</button>
-      </div>
+  <div class="task-input">
+    <input id="taskInput" placeholder="Nova tarefa">
+    <button onclick="createTask()" class="primary">Criar</button>
+  </div>
 
-      <ul id="taskList"></ul>
-    </div>
+  <button onclick="logout()">Sair</button>
+
+  <ul id="taskList"></ul>
+</div>
 
   </div>
 

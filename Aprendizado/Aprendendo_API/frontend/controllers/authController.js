@@ -1,5 +1,6 @@
 console.log("AUTH CONTROLLER CARREGADO");
 
+import { updateUI } from "../app.js";
 import {
   loginRequest,
   saveToken
@@ -38,7 +39,7 @@ async function register() {
 }
 
 // 🔵 LOGIN
-async function login() {
+export async function login() {
   console.log("CHAMANDO LOGIN 🔥");
 
   const email = document.getElementById("email").value;
@@ -47,12 +48,21 @@ async function login() {
   try {
     const data = await loginRequest(email, password);
 
-    saveToken(data.token);
+    console.log("RESPOSTA LOGIN:", data);
+
+    if (!data.data.token) {
+    alert(data.message || "Erro ao fazer login");
+    return;
+  }
+   
+
+    saveToken(data.data.token);
 
     alert("Logado com sucesso!");
 
     // 🔥 chama listTasks do outro controller
     if (window.listTasks) {
+      updateUI();
       window.listTasks();
     }
 

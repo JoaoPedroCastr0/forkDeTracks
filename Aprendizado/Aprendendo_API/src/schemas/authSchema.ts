@@ -13,6 +13,6 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Senha obrigatória"),
 });
 
-// Tipagem automática (opcional e profissional)
+//Tipagem automática (opcional e profissional)
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type LoginDTO = z.infer<typeof loginSchema>;
