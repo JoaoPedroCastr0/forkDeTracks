@@ -9,12 +9,12 @@ export async function loginUser(data: LoginDTO) {
 
   const user = users[0];
 
-  // 🔹 valida usuário
+  // valida usuário
   if (!user) {
     throw new AppError("Usuário não encontrado");
   }
 
-  // 🔹 verifica senha
+  // verifica senha
   const isValid = await Bun.password.verify(
     data.password,
     user.password

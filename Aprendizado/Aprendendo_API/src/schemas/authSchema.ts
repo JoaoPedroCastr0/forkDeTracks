@@ -6,13 +6,14 @@ export const createUserSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
+export type CreateUserDTO = z.infer<typeof createUserSchema>;
+
+
+
 
 // Schema de login
 export const loginSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha obrigatória"),
 });
-
-//Tipagem automática (opcional e profissional)
-export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type LoginDTO = z.infer<typeof loginSchema>;

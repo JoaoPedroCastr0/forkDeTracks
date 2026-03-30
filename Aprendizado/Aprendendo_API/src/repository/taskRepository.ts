@@ -18,12 +18,14 @@ export async function getTasksByUser(userId: number) {
     "SELECT * FROM tasks WHERE user_id = ?",
     [userId]
   );
-
   return rows;
 }
 
 export async function deleteTask(id: number) {
-  await db.query("DELETE FROM tasks WHERE id = ?", [id]);
+  await db.query(
+    "DELETE FROM tasks WHERE id = ?", 
+    [id]
+  );
 }
 
 export async function updateTask(id: number, title: string) {

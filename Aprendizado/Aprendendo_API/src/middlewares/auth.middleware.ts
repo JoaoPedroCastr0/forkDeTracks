@@ -20,7 +20,10 @@ export function authMiddleware(
       process.env.JWT_SECRET!
     ) as JwtPayload;
 
-    req.user = decoded;
+    req.user = {
+      id: decoded.id,
+      email: decoded.email
+    };
 
     next();
   } catch {
