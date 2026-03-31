@@ -25,7 +25,7 @@ export async function deleteTaskService(id: number) {
   return taskRepo.deleteTask(id);
 }
 
-export async function updateTaskService(id: number, title: string) {
+export async function updateTaskService(id: number , title: string) {
   if (!id) {
     throw new Error("ID inválido");
   }
