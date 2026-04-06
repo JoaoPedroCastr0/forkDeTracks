@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import "express";
 import { JwtPayload } from "./auth";
 
