@@ -1,13 +1,15 @@
 import js from "@eslint/js";
+import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   js.configs.recommended,
 
-  // 🔹 BACKEND (Node)
+  // 🔹 BACKEND (TypeScript)
   {
-    files: ["**/*.ts", "**/*.js"],
-    ignores: ["frontend/**"],
+    files: ["src/**/*.ts"],
     languageOptions: {
+      parser: tsParser,
       ecmaVersion: 2022,
       sourceType: "module",
       globals: {
@@ -15,6 +17,9 @@ export default [
         process: "readonly",
         __dirname: "readonly",
       },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
       "no-unused-vars": "warn",
@@ -36,6 +41,7 @@ export default [
         alert: "readonly",
         prompt: "readonly",
         location: "readonly",
+        console: "readonly",
       },
     },
     rules: {
