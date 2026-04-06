@@ -3,7 +3,7 @@ import { AppError } from "../utils/AppError";
 
 export function errorMiddleware(
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ) {
