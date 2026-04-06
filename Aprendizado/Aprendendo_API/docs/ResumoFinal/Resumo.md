@@ -73,6 +73,15 @@ nos dos schemas, é feito a partir do ZOD, utilizando "interferência de tipo".
 A chamadas das rotas é feita a partir do "fetch" no Front , chamando as rotas produzidas no backend.
 
 
+Este projeto foi desenvolvido com foco em:
+
+Aprender autenticação com JWT
+Estrurar um backend escalável com arquitetura em camadas de forma básica
+Aplicar boas práticas com TypeScript
+Trabalhar com validação robusta de dados
+
+Obrigado Theo e Alex !
+
 
 
 
