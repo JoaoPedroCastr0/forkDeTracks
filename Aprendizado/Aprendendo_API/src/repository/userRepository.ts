@@ -1,5 +1,5 @@
 import { db } from "../database/connection";
-import type { User } from "../models/User.ts"
+import type { User } from "../models/User";
 
 
 export async function createUser(nome: string, email: string, password: string) {

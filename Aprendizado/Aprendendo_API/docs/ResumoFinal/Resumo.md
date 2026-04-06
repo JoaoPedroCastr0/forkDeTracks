@@ -5,7 +5,7 @@
 Regra de segurança do navegador(CORS POLICY) que controla quem pode acessar a API,
 permitindo que o front desenvolvido possa acessar a API sem o backend bloquear.
 Pode-se concluir também que com determinadas requisições(DELETE, PUT, PATCH) o navegador exerce
-um determinado tipo de "desconfiança", e a permissão de determinados metodos funcionar é o CORS.
+um determinado tipo de "desconfiança", e a permissão de determinados métodos funcionarem é o CORS.
 
 Frontend quer acessar API
         ↓
@@ -44,6 +44,37 @@ req.url/req.path => URL utilizada para determinada busca ou ação no sistema.
 req.ip => Onde vem o ip do cliente.
 
 req.user => É "injetado" na requisição, através de uma função middleware.
+
+- Middlewares 
+
+Neste mini-projeto, foi realizada a utilização de middlewares de validação, autenticação e erro, para interceptar as requisições simular uma segurança maior. 
+
+Autenticação => Injeta "req.user" dentro de cada requisição feita pelo usuário, verificando se o token 
+gerado pelo middleware no momento do login está presente em cada atividade feita pelo usuário.
+
+Validação => Middleware responsável por controlar o formato dos dados que estarão na requisição, antes
+de chegar no controlador e serviço.
+
+Erro => Middleware utilizado para tratamento de erros, é acionado quando é identificada alguma
+despadronização no comportamento da api na passagem de dados.
+
+- Hash de senha
+
+As senhas com Hash são geradas a partir de uma própria funcionalidade presente dentro do bun, onde
+são aplicadas dentro da regra de negócio na criação do usuário.
+
+- Validador de dados 
+
+A forma como os dados são recebidos de acordo com as regras estebelecidas 
+nos dos schemas, é feito a partir do ZOD, utilizando "interferência de tipo". 
+
+- Consolidação com front-end
+
+A chamadas das rotas é feita a partir do "fetch" no Front , chamando as rotas produzidas no backend.
+
+
+
+
 
 
 

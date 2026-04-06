@@ -8,7 +8,7 @@ import {
 
 // 🟢 REGISTER
 async function register() {
-  console.log("CHAMANDO REGISTER 🔥");
+  console.log("CHAMANDO REGISTER ");
 
   const nome = document.getElementById("nome").value;
   const email = document.getElementById("email").value;
@@ -40,7 +40,7 @@ async function register() {
 
 // 🔵 LOGIN
 export async function login() {
-  console.log("CHAMANDO LOGIN 🔥");
+  console.log("CHAMANDO LOGIN ");
 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -60,7 +60,7 @@ export async function login() {
 
     alert("Logado com sucesso!");
 
-    // 🔥 chama listTasks do outro controller
+    
     if (window.listTasks) {
       updateUI();
       window.listTasks();

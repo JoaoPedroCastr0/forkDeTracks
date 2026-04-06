@@ -66,7 +66,7 @@ async function listTasks() {
         }
       };
 
-      // 📦 montar item
+      // montar item
       li.appendChild(title);
       li.appendChild(editBtn);
       li.appendChild(deleteBtn);

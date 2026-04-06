@@ -30,7 +30,7 @@ export async function loginUser(data: LoginDTO) {
     throw new AppError("JWT_SECRET não definido");
   }
 
-  // 🔹 gera token
+  // gera token
   const token = jwt.sign(
     {
       id: user.id,

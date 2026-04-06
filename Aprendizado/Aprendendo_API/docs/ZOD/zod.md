@@ -7,5 +7,3 @@ schemas/
 services/
   userService.ts → lógica usando DTO
 
-controllers/
-  userController.ts → usa schema.parse()

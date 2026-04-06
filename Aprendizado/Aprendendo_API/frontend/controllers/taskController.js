@@ -15,7 +15,7 @@ async function createTask() {
 async function listTasks() {
   const tasks = await getTasksRequest();
 
-  console.log("TASKS:", tasks); // ✅ agora sim
+  console.log("TASKS:", tasks); 
 
   if (!Array.isArray(tasks)) {
     console.error("Erro ao buscar tasks:", tasks);
