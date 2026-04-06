@@ -5,7 +5,7 @@ import type { JwtPayload } from "../types/auth";
 
 export function authMiddleware(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) {
   const token = req.headers.authorization?.split(" ")[1];
