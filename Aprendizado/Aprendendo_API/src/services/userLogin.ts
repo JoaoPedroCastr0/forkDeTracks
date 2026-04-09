@@ -1,7 +1,8 @@
 import * as userRepository from "../repository/userRepository";
-import jwt from "jsonwebtoken";
 import type { LoginDTO } from "../schemas/authSchema";
 import { AppError } from "../utils/AppError";
+import { generateToken } from "../utils/generateToken";
+
 
 
 export async function loginUser(data: LoginDTO) {
@@ -31,17 +32,10 @@ export async function loginUser(data: LoginDTO) {
   }
 
   // gera token
-  const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email
-    },
-    secret,
-    {
-      expiresIn: "1d"
-    }
-  );
-
+const token = generateToken({
+  id: user.id,
+  email: user.email
+});
   return {
     user: {
       id: user.id,

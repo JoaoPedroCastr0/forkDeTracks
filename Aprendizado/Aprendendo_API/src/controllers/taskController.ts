@@ -5,7 +5,7 @@ import {
   deleteTaskService,
   updateTaskService
 } from "../services/taskService";
-import type { UpdateTaskDTO } from "src/schemas/taskSchema";
+import type { UpdateTaskDTO } from "@/schemas/taskSchema";
 
 export async function createTask(req: Request, res: Response) {
   const userId = req.user!.id;

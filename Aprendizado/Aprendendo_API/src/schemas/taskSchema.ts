@@ -8,10 +8,15 @@ export type CreateTaskDTO = z.infer<typeof createTaskSchema>;
 
 
 
+
+
 export const idParamSchema = z.object({
   id: z.string().regex(/^\d+$/)
 });
 export type idParamDTO = z.infer<typeof idParamSchema>;
+
+
+
 
 
 export const updateTaskSchema = createTaskSchema

@@ -3,9 +3,9 @@ import { register } from "../controllers/userController";
 import { login } from "../controllers/loginController";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { createTask, listTasks, deleteTask, updateTask } from "../controllers/taskController";
-import { validate } from "src/middlewares/validate.middleware";
-import { createUserSchema, loginSchema } from "src/schemas/authSchema";
-import { createTaskSchema, idParamSchema, updateTaskSchema} from "src/schemas/taskSchema";
+import { validate } from "@/middlewares/validate.middleware";
+import { createUserSchema, loginSchema } from "@/schemas/authSchema";
+import { createTaskSchema, idParamSchema, updateTaskSchema} from "@/schemas/taskSchema";
 
 const routes = Router();
 
