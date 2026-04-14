@@ -1,4 +1,4 @@
-import { db } from "../database/connection";
+import { db } from "../database/prisma";
 import type { User } from "../models/User";
 
 

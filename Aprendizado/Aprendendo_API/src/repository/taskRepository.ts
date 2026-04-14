@@ -1,46 +1,38 @@
-import { db } from "../database/connection";
-import type { Task } from "../models/Task";
-import type { RowDataPacket, ResultSetHeader } from "mysql2";
+import { prisma } from "../database/prisma"
+
 
 export async function createTask(
   title: string,
   description: string | null,
   userId: number
-): Promise<ResultSetHeader> {
-  const [result] = await db.query<ResultSetHeader>(
-    "INSERT INTO tasks (title, description, user_id) VALUES (?, ?, ?)",
-    [title, description, userId]
-  );
-
-  return result;
+): Promise<Task> {
+  return await prisma.task.create({
+    data: {
+      title,
+      description,
+      userId
+    }
+  })
 }
 
 export async function getTasksByUser(userId: number): Promise<Task[]> {
-  const [rows] = await db.query<(Task & RowDataPacket)[]>(
-    "SELECT * FROM tasks WHERE user_id = ?",
-    [userId]
-  );
-
-  return rows;
+  return await prisma.task.findMany({
+    where: { userId }
+  })
 }
 
-export async function deleteTask(id: number): Promise<ResultSetHeader> {
-  const [result] = await db.query<ResultSetHeader>(
-    "DELETE FROM tasks WHERE id = ?", 
-    [id]
-  );
-
-  return result;
+export async function deleteTask(id: number): Promise<Task> {
+  return await prisma.task.delete({
+    where: { id }
+  })
 }
 
 export async function updateTask(
   id: number,
   title: string
-): Promise<ResultSetHeader> {
-  const [result] = await db.query<ResultSetHeader>(
-    "UPDATE tasks SET title = ? WHERE id = ?",
-    [title, id]
-  );
-
-  return result;
+): Promise<Task> {
+  return await prisma.task.update({
+    where: { id },
+    data: { title }
+  })
 }

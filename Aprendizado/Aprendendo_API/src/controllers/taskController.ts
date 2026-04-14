@@ -8,40 +8,78 @@ import {
 import type { UpdateTaskDTO } from "@/schemas/taskSchema";
 
 export async function createTask(req: Request, res: Response) {
-  const userId = req.user!.id;
+  try {
+    const userId = req.user?.id;
 
-  await createTaskService(req.body, userId);
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
 
-  return res.status(201).json({
-    message: "Tarefa criada com sucesso"
-  });
+    const task = await createTaskService(req.body, userId);
+
+    return res.status(201).json(task);
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao criar tarefa"
+    });
+  }
 }
 
 export async function listTasks(req: Request, res: Response) {
-  const userId = req.user!.id;
+  try {
+    const userId = req.user?.id;
 
-  const tasks = await listTasksService(userId);
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
 
-  return res.json(tasks);
+    const tasks = await listTasksService(userId);
+
+    return res.json(tasks);
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao listar tarefas"
+    });
+  }
 }
 
 export async function deleteTask(req: Request, res: Response) {
-  const { id } = req.params;
+  try {
+    const id = Number(req.params.id);
 
-  await deleteTaskService(Number(id));
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
 
-  return res.json({ message: "Task removida" });
+    await deleteTaskService(id);
+
+    return res.json({ message: "Task removida" });
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao deletar tarefa"
+    });
+  }
 }
 
 export async function updateTask(
   req: Request<{ id: string }, {}, UpdateTaskDTO>,
   res: Response
 ) {
-  const id = Number(req.params.id);
+  try {
+    const id = Number(req.params.id);
 
-  const { title } = req.body;
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
 
-  await updateTaskService(id, title);
+    const { title } = req.body;
 
-  return res.json({ message: "Task atualizada" });
+    const task = await updateTaskService(id, title);
+
+    return res.json(task);
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao atualizar tarefa"
+    });
+  }
 }

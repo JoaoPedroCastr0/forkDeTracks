@@ -25,7 +25,7 @@ export async function loginUser(data: LoginDTO) {
     throw new AppError("Senha inválida");
   }
 
-  // 🔹 valida secret ANTES
+  // valida secret ANTES
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new AppError("JWT_SECRET não definido");
