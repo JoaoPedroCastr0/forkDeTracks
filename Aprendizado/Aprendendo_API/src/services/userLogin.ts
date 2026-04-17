@@ -5,10 +5,11 @@ import { generateToken } from "../utils/generateToken";
 
 
 
-export async function loginUser(data: LoginDTO) {
-  const users = await userRepository.findUserByEmail(data.email);
 
-  const user = users[0];
+export async function loginUser(data: LoginDTO) {
+  const user = await userRepository.findUserByEmail(data.email);
+
+ 
 
   // valida usuário
   if (!user) {

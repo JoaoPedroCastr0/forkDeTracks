@@ -5,7 +5,7 @@ import { AppError } from "../utils/AppError";
 export async function registerUser(data: CreateUserDTO) {
   const userExists = await userRepo.findUserByEmail(data.email); 
 
-  if ((userExists as any[]).length > 0) {
+  if (userExists) {
     throw new AppError("Usuário já existe");
   }
 
