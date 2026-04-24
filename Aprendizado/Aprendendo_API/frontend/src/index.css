@@ -49,53 +49,28 @@ input {
 }
 
 button {
+  width: 100%;
   padding: 10px;
-  border: none;
   border-radius: 8px;
-  cursor: pointer;
-  background: #334155;
+  border: none;
+  background: #3b82f6;
   color: white;
-  transition: 0.2s;
-  margin-bottom: 10px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 button:hover {
-  background: #475569;
-}
-
-button.primary {
-  background: #3b82f6;
-}
-
-button.primary:hover {
   background: #2563eb;
 }
 
-.task-input {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-#taskList {
-  list-style: none;
-}
-
-#taskList li {
-  background: #334155;
-  padding: 10px;
-  border-radius: 8px;
+.error {
+  color: #ef4444;
+  font-size: 14px;
   margin-bottom: 10px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
-#taskList li button {
-  margin-left: 5px;
-}
-
-#appSection {
-  display: none;
+.success {
+  color: #22c55e;
+  font-size: 14px;
+  margin-bottom: 10px;
 }

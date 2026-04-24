@@ -1,49 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Task App</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-  <div class="container">
-
-    <h1>Task Manager</h1>
-
-    <!-- AUTH -->
-    <!-- AUTH -->
-<div class="card" id="authSection">
-  <h2>Registre-se ou faça login</h2>
-
-  <form id="authForm">
-    <input id="nome" placeholder="Nome">
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Senha">
-
-    <div class="actions">
-      <button type="button" onclick="register()">Registrar</button>
-      <button type="button" onclick="login()">Login</button>
-    </div>
-  </form>
-</div>
-
-<!-- TASKS -->
-<div class="card" id="appSection">
-  <h2>Minhas Tarefas</h2>
-
-  <div class="task-input">
-    <input id="taskInput" placeholder="Nova tarefa">
-    <button onclick="createTask()" class="primary">Criar</button>
-  </div>
-
-  <button onclick="logout()">Sair</button>
-
-  <ul id="taskList"></ul>
-</div>
-
-  </div>
-
-  <script type="module" src="app.js"></script>
-</body>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React App - Aprendendo API</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

@@ -1,6 +1,6 @@
-CREATE DATABASE condominio_db;
+CREATE DATABASE tarefasDB;
 
-USE condominio_db;
+USE tarefasDB;
 
 -- =========================
 -- TABELA DE USUÁRIOS
