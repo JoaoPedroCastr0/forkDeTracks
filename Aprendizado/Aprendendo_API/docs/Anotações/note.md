@@ -6,3 +6,9 @@ Se familiarizar com pipelines CI/CD
 
 Aprofundamento no docker e suas funcionalidades
 
+Construção de rota logout 
+
+Filtras tarefas 
+
+marcar como concluída
+
