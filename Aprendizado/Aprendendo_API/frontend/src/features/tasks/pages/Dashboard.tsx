@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../../shared/api';
+import { api } from '../../../shared/services/api';
 import { Task } from '../../../shared/types/task';
 import { useAuth } from '../../../context/AuthContext';
 import Button from '../../../shared/components/Button';

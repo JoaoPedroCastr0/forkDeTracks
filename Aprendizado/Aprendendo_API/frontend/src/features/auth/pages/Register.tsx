@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../../shared/api';
+import { api } from '../../../shared/services/api';
 import Button from '../../../shared/components/Button';
 
 const Register: React.FC = () => {
