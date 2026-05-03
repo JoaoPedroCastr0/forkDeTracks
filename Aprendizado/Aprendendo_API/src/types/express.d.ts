@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 
 import "express";
-import { JwtPayload } from "./auth";
+import { SessionUser } from "./auth";
 
 declare module "express-serve-static-core" {
   interface Request {
-    user?: JwtPayload;
+    user?: SessionUser;
   }
 }

@@ -3,7 +3,7 @@ import type { CreateTaskDTO } from "../schemas/taskSchema";
 
 export async function createTaskService(
   data: CreateTaskDTO,
-  userId: number
+  userId: string
 ) {
   if (!data.title || data.title.trim() === "") {
     throw new Error("Título é obrigatório");
@@ -16,24 +16,24 @@ export async function createTaskService(
   );
 }
 
-export async function listTasksService(userId: number) {
-  if (typeof userId !== "number" || userId <= 0) {
+export async function listTasksService(userId: string) {
+  if (!userId || typeof userId !== "string") {
     throw new Error("UserId inválido");
   }
 
   return await taskRepo.getTasksByUser(userId);
 }
 
-export async function deleteTaskService(id: number) {
-  if (typeof id !== "number" || id <= 0) {
+export async function deleteTaskService(id: string) {
+  if (!id || typeof id !== "string") {
     throw new Error("ID inválido");
   }
 
   return await taskRepo.deleteTask(id);
 }
 
-export async function updateTaskService(id: number, title: string) {
-  if (typeof id !== "number" || id <= 0) {
+export async function updateTaskService(id: string, title: string) {
+  if (!id || typeof id !== "string") {
     throw new Error("ID inválido");
   }
 

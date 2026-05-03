@@ -45,13 +45,13 @@ export async function listTasks(req: Request, res: Response) {
 
 export async function deleteTask(req: Request, res: Response) {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ error: "ID inválido" });
     }
 
-    await deleteTaskService(id);
+    await deleteTaskService(id as string);
 
     return res.json({ message: "Task removida" });
   } catch (error: any) {
@@ -66,15 +66,15 @@ export async function updateTask(
   res: Response
 ) {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ error: "ID inválido" });
     }
 
     const { title } = req.body;
 
-    const task = await updateTaskService(id, title);
+    const task = await updateTaskService(id as string, title);
 
     return res.json(task);
   } catch (error: any) {

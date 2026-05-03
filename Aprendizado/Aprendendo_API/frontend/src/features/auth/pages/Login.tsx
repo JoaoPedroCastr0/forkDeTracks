@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../../shared/services/api';
-import { useAuth } from '../../../context/AuthContext';
+import { authClient } from '../../../shared/services/authClient';
 import Button from '../../../shared/components/Button';
 
 const Login: React.FC = () => {
@@ -11,7 +10,6 @@ const Login: React.FC = () => {
   const [success, setSuccess] = useState('');
   
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,21 +17,20 @@ const Login: React.FC = () => {
     setSuccess('');
 
     try {
-      const response = await api.post('/login', { email, password });
+      const { data, error: authError } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (authError) {
+        setError(authError.message || 'Erro ao efetuar login');
+        return;
+      }
 
       setSuccess('Login realizado com sucesso!');
-      
-      // Usa o contexto global para efetuar o login na sessão da aplicação inteira
-      login(response.data.token, response.data.user.id);
-      
-      // O Roteador gerencia a mudança visual
       navigate('/dashboard');
     } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError('Ocorreu um erro ao conectar com o servidor.');
-      }
+      setError('Ocorreu um erro ao conectar com o servidor.');
     }
   };
 

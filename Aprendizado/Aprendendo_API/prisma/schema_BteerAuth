@@ -1,0 +1,45 @@
+model User {
+  id        String   @id @default(cuid())
+  nome      String?
+  email     String   @unique
+  password  String?
+  createdAt DateTime @default(now())
+
+  sessions  Session[]
+  accounts  Account[]
+  tasks     Task[]
+
+  @@map("User")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+
+  @@map("Session")
+}
+
+model Account {
+  id                 String @id @default(cuid())
+  userId             String
+  provider           String
+  providerAccountId  String
+  user               User   @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+  @@map("Account")
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("Task")
+}

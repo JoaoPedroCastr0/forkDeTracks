@@ -1,32 +1,33 @@
 import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import { AppError } from "../utils/AppError";
-import type { JwtPayload } from "../types/auth";
+import { auth } from "../auth/auth";
+import { fromNodeHeaders } from "better-auth/node";
 
-export function authMiddleware(
+export async function authMiddleware(
   req: Request,
   _res: Response,
   next: NextFunction
 ) {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    throw new AppError("Token não fornecido", 401);
-  }
-
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as JwtPayload;
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers)
+    });
+
+    if (!session) {
+      throw new AppError("Não autorizado", 401);
+    }
 
     req.user = {
-      id: decoded.id,
-      email: decoded.email
+      id: session.user.id,
+      email: session.user.email,
     };
 
     next();
-  } catch {
-    throw new AppError("Token inválido", 401);
+  } catch (error) {
+    if (error instanceof AppError) {
+      next(error);
+    } else {
+      next(new AppError("Falha na autenticação", 401));
+    }
   }
 }

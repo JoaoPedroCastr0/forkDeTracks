@@ -1,0 +1,50 @@
+Implementação do Better Auth com Prisma
+Este plano descreve como vamos substituir o sistema JWT atual pelo Better Auth, resolver o erro do banco de dados e garantir a compatibilidade com o front-end React.
+
+User Review Required
+WARNING
+
+Como estamos alterando o sistema de autenticação e os IDs para padrão CUID do Better Auth, o banco de dados precisará ser recriado/limpo com npx prisma db push ou npx prisma migrate dev. Por favor, confirme se podemos prosseguir e deletar os dados de teste locais.
+
+Open Questions
+IMPORTANT
+
+Podemos apagar os dados de teste atuais do banco? (A estrutura de IDs mudará de Int para String/CUID padrão do Better Auth).
+O frontend atual já está consumindo as rotas antigas /login e /register? Com o Better Auth, essas rotas mudarão para a API dele /auth/sign-in/email e /auth/sign-up/email. Isso afetará o código React que precisa ser adaptado depois.
+Proposed Changes
+Database e Prisma
+Vamos utilizar o prismaAdapter nativo do Better Auth em vez do driver postgres genérico, o que resolverá a falha de inicialização (causada pela tentativa do Kysely rodar fora de ambiente compatível).
+
+[MODIFY] prisma/schema.prisma
+Adição dos modelos necessários: Session, Account, Verification.
+Adaptação da model User (adição de campos como emailVerified, image).
+Troca dos tipos de ID de Int para String (padrão CUID para Better Auth), refletindo também na model Task.
+[MODIFY] src/database/prisma.ts
+Ajuste na inicialização do pool com pg de forma correta e robusta.
+Autenticação e Better Auth
+[MODIFY] src/auth/auth.ts
+Configuração do Better Auth para utilizar o prismaAdapter.
+Habilitação do plugin emailAndPassword para suportar login por email e senha, como era antes.
+[MODIFY] src/middlewares/auth.middleware.ts
+Refatoração completa. Removeremos a verificação do JWT com jsonwebtoken e implementaremos a checagem da sessão através de auth.api.getSession().
+Rotas e Controllers
+[MODIFY] src/app.ts e src/routes/AllRoutes.ts
+Garantir a montagem do .use("/auth", auth.handler) (rotas automáticas do Better Auth).
+Remover rotas manuais antigas de /login e /register. O Better Auth lidará com /auth/sign-up/email e /auth/sign-in/email.
+[DELETE] src/controllers/loginController.ts
+Não precisaremos mais de geração manual de JWT ou validação de login.
+[MODIFY] src/controllers/userController.ts
+Será excluído ou adaptado se não precisarmos de lógicas extras além das do Better Auth.
+[MODIFY] src/controllers/taskController.ts
+Ajustar tipos dos IDs caso mudemos para String (que antes eram passados como inteiros).
+Verification Plan
+Automated Tests
+Rodaremos npx prisma db push para aplicar o esquema.
+Inicializaremos a API.
+Usaremos curl ou requisições HTTP locais para testar o fluxo:
+Registro de um novo usuário (POST /auth/sign-up/email)
+Login com o usuário (POST /auth/sign-in/email)
+Requisição à rota protegida (POST /tasks) com os headers/cookies fornecidos pela sessão.
+Manual Verification
+A aplicação subirá sem o erro crítico BetterAuthError: Failed to initialize database adapter.
+Verificação se as sessões estão sendo de fato inseridas na tabela Session no PostgreSQL.

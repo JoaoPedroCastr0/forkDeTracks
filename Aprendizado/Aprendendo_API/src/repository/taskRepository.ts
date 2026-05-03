@@ -4,7 +4,7 @@ import { prisma } from "../database/prisma"
 export async function createTask(
   title: string,
   description: string | null,
-  userId: number
+  userId: string
 ) {
   return await prisma.task.create({
     data: {
@@ -15,20 +15,20 @@ export async function createTask(
   })
 }
 
-export async function getTasksByUser(userId: number) {
+export async function getTasksByUser(userId: string) {
   return await prisma.task.findMany({
     where: { userId }
   })
 }
 
-export async function deleteTask(id: number) {
+export async function deleteTask(id: string) {
   return await prisma.task.delete({
     where: { id }
   })
 }
 
 export async function updateTask(
-  id: number,
+  id: string,
   title: string
 ) {
   return await prisma.task.update({

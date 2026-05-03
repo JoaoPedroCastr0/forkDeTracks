@@ -1,0 +1,98 @@
+# 🚀 Documentação da Migração: Better Auth
+
+Esta documentação fornece os detalhes técnicos de como o backend (Bun + Express + Prisma + PostgreSQL) foi migrado com sucesso de uma solução de JWT customizada para a biblioteca Better Auth.
+
+---
+
+## 🔹 1. O que foi feito
+
+* **Nova Estrutura do Prisma**: Os modelos `Session`, `Account` e `Verification` foram adicionados ao arquivo `schema.prisma`. O tipo da chave primária (ID) de `User` e `Task` foi alterado de `Int` para `String` (formato `cuid()` padrão do Better Auth).
+* **Configuração do Better Auth**: A inicialização em `auth.ts` passou a usar o adaptador oficial nativo do Prisma para Better Auth (`prismaAdapter`). Adicionou-se também configuração de origens confiáveis (`trustedOrigins`).
+* **Adaptação no Express**: Configuração do middleware `toNodeHandler(auth)` no arquivo `app.ts` para capturar de forma correta e automática as rotas em `/api/auth`.
+* **Refatoração do Sistema**: Substituímos a validação de token JWT customizada dentro de `auth.middleware.ts` pela verificação oficial de sessão via `auth.api.getSession()`.
+* **Remoção de Código Obsoleto**: Controladores e schemas relacionados ao login e registro manuais (`loginController.ts` e `userController.ts`) foram descartados.
+
+---
+
+## 🔹 2. Problemas encontrados (e por que aconteceram)
+
+> [!WARNING]
+> **Erro `BetterAuthError: Failed to initialize database adapter`:**
+> Este erro ocorreu devido à forma como o Better Auth estava sendo configurado anteriormente: utilizando o adaptador embutido de "postgres" que depende ativamente do `Kysely`. Como o Bun pode apresentar falhas nativas ou silenciosas para resolver sub-dependências não preparadas no Windows/WSL, a inicialização falhava. Além disso, a falta de padronização nas tabelas para este caso genérico piorou o diagnóstico.
+
+> [!WARNING]
+> **Incompatibilidade do Express 5 com Curingas:**
+> Ocorreu um erro interno na configuração das rotas: `Missing parameter name at index 11: /api/auth/*`.
+> **Motivo**: O Express 5 alterou a forma de compilação de expressões regulares e removeu o uso simples de curingas (`*`) da função `app.all()`.
+
+> [!WARNING]
+> **Problema de Requisições via Express/Bun:**
+> Ocorreu o erro: `TypeError: "/sign-up/email" cannot be parsed as a URL.`
+> **Motivo**: O objeto de requisição (Request) do Express não é o mesmo que o objeto Request padrão global das APIs Web/Fetch que o Bun/Better Auth esperam.
+
+> [!WARNING]
+> **Falhas de Origem (CORS/CSRF):**
+> Ocorreu o erro: `MISSING_OR_NULL_ORIGIN` ou `INVALID_ORIGIN` na chamada do endpoint.
+> **Motivo**: Por motivos de segurança e proteção CSRF nativa, o Better Auth barra requisições que não provêm de origens explicitamente confiáveis caso a requisição pareça uma requisição cross-origin não identificada.
+
+---
+
+## 🔹 3. Como foi resolvido
+
+1. **Uso do Prisma Adapter**: Optou-se por utilizar `@better-auth/prisma-adapter` associado com o cliente Prisma do próprio projeto. Dessa forma o Better Auth delega as queries do banco para o Prisma que já possuía uma conexão segura e estabilizada através da lib genérica do `pg` associada ao `@prisma/adapter-pg`.
+2. **Correção do Pool do DB**: Em `src/database/prisma.ts`, garantimos a criação de uma instância oficial `new Pool({ connectionString })` do node-postgres e a passamos para `PrismaPg`, mantendo o driver Edge estável.
+3. **Ponte do Express (Node Handler)**: Usamos `app.use("/api/auth", toNodeHandler(auth))` em vez de repassar a função direta do Better Auth. A função utilitária `toNodeHandler` do Better Auth cria os "stubs" necessários e compila os objetos nativos do Node/Express em objetos Request/Response nativos para o funcionamento do motor de rotas da biblioteca sem conflitos. E ao usar `app.use` resolvemos também o problema de rotas curinga do Express 5.
+4. **Permissão de Origens**: Incluímos as URLs de desenvolvimento do frontend (`http://localhost:5173`, `http://127.0.0.1:5173`, etc) na opção `trustedOrigins` em `auth.ts`, resolvendo as proibições CSRF/CORS.
+
+---
+
+## 🔹 4. Como o sistema funciona agora
+
+1. **Autenticação e Sessão**: 
+   Todo o fluxo de gerência de tokens, hash de senhas e verificação do usuário passou para as rotas autogeradas do Better Auth baseadas no prefixo `/api/auth/`.
+2. **Armazenamento**: 
+   O banco de dados agora possui tabelas completas para gerenciar Sessões (quando e qual token), Contas e Verificações de usuários, não necessitando de chaves JWT vulneráveis circulando sem invalidação.
+3. **Rotas Protegidas**: 
+   Sempre que um usuário acessar `/tasks`, o middleware `authMiddleware` injetará os `headers` na função `auth.api.getSession()`. O Better Auth se conectará ao banco via Prisma para cruzar os headers com o banco e devolver o objeto de sessão completo, injetando o `req.user.id` e seguindo o fluxo de controllers normalmente.
+
+---
+
+## 🔹 5. Como testar
+
+A API do Better Auth já provê os endpoints. Abaixo estão as duas chamadas principais que podem ser feitas para testar o fluxo.
+
+**Criando um Novo Usuário (Sign Up)**
+```bash
+curl -X POST http://localhost:4000/api/auth/sign-up/email \
+-H "Content-Type: application/json" \
+-H "Origin: http://localhost:5173" \
+-d '{
+  "name": "Desenvolvedor",
+  "email": "dev@exemplo.com",
+  "password": "senha_segura_123"
+}'
+```
+
+**Fazendo Login (Sign In)**
+```bash
+curl -X POST http://localhost:4000/api/auth/sign-in/email \
+-H "Content-Type: application/json" \
+-H "Origin: http://localhost:5173" \
+-d '{
+  "email": "dev@exemplo.com",
+  "password": "senha_segura_123"
+}'
+```
+
+*(Esses retornos darão os cookies adequados e um token json que o FrontEnd React pode armazenar caso o uso de Cookies não esteja habilitado ou para chamadas subsequentes passando o header de Authorization).*
+
+---
+
+## 🔹 6. Impacto na arquitetura
+
+* **O que mudou**: A estrutura dos IDs do banco mudou de `Int` para `String` (Cuid), tornando os registros mais escaláveis contra ataques de adivinhação. A lógica "verbosa" de checagem e hashing de tokens e senhas evaporou, passando toda a responsabilidade de "Account" para o Better Auth.
+* **O que melhorou**: 
+  - Eliminação de bugs envolvendo geração inconsistente de tokens via `jsonwebtoken`.
+  - Melhoria maciça na compatibilidade com features modernas para FrontEnd (Cookies, Gerência de Sessão entre abas do React e SSR se aplicável).
+  - Backend altamente limpo e delegável, sobrando mais espaço nos controllers focados somente na **Lógica de Negócios** (Gerência das `Tasks`).
+  - Compatibilidade resolvida para rodar perfeitamente sem falhas de adaptação `pg/Kysely` em ambientes Windows / WSL através do adaptador Prisma.

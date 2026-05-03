@@ -1,39 +1,32 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
+import { authClient } from '../shared/services/authClient';
 
 interface AuthContextData {
   isAuthenticated: boolean;
-  login: (token: string, userId: string) => void;
+  login: (token?: string, userId?: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
+  const { data, isPending } = authClient.useSession();
+  
+  const isAuthenticated = !!data?.user;
 
-  useEffect(() => {
-    // Ao iniciar, verifica se já existe token na sessão local
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
-  }, []);
-
-  const login = (token: string, userId: string) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('userId', userId);
-    setIsAuthenticated(true);
+  // Login agora é disparado pelo Better Auth na página Login.tsx,
+  // mantemos a função para retrocompatibilidade se necessário, ou esvaziamos.
+  const login = () => {
+    // A sessão reativa (useSession) atualizará automaticamente o isAuthenticated
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    setIsAuthenticated(false);
+  const logout = async () => {
+    await authClient.signOut();
+    localStorage.removeItem('token'); // limpa lixo antigo
+    localStorage.removeItem('userId'); // limpa lixo antigo
   };
 
-  if (loading) {
+  if (isPending) {
     return <div style={{ textAlign: 'center', marginTop: '50px' }}>Carregando sessão...</div>;
   }
 

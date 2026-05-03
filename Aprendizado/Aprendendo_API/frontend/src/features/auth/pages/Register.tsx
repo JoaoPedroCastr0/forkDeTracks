@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../../shared/services/api';
+import { authClient } from '../../../shared/services/authClient';
 import Button from '../../../shared/components/Button';
 
 const Register: React.FC = () => {
@@ -18,23 +18,29 @@ const Register: React.FC = () => {
     setSuccess('');
 
     try {
-      await api.post('/register', { nome, email, password });
+      const { data, error: authError } = await authClient.signUp.email({
+        name: nome,
+        email,
+        password,
+      });
+
+      if (authError) {
+        setError(authError.message || 'Erro ao cadastrar usuário');
+        return;
+      }
       
-      setSuccess('Cadastro realizado com sucesso! Redirecionando para login...');
+      setSuccess('Cadastro realizado com sucesso! Redirecionando para dashboard...');
       setNome('');
       setEmail('');
       setPassword('');
       
       setTimeout(() => {
-        navigate('/login');
+        // Better Auth já loga o usuário automaticamente no sign up
+        navigate('/dashboard');
       }, 2000);
 
     } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError('Ocorreu um erro ao tentar cadastrar o usuário.');
-      }
+      setError('Ocorreu um erro ao tentar cadastrar o usuário.');
     }
   };
 
