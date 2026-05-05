@@ -8,7 +8,10 @@
     "start:dev": "bun --hot src/server.ts",
     "dev": "bun run src/server.ts",
     "start": "bun run src/server.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:migrate": "bun x prisma migrate dev",
+    "db:studio": "bun x prisma studio",
+    "db:generate": "bun x prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
