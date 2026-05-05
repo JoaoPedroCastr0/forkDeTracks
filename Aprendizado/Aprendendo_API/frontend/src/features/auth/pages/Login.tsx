@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authClient } from '../../../shared/services/authClient';
 import Button from '../../../shared/components/Button';
+import { useAuth } from '../../../context/AuthContext';
 
 const Login: React.FC = () => {
+
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
+  const { refetch } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -17,7 +21,7 @@ const Login: React.FC = () => {
     setSuccess('');
 
     try {
-      const { data, error: authError } = await authClient.signIn.email({
+      const { error: authError } = await authClient.signIn.email({
         email,
         password,
       });
@@ -28,6 +32,9 @@ const Login: React.FC = () => {
       }
 
       setSuccess('Login realizado com sucesso!');
+      
+      // Esperamos a sessão ser reconhecida pelo cliente
+      await refetch();
       navigate('/dashboard');
     } catch (err: any) {
       setError('Ocorreu um erro ao conectar com o servidor.');

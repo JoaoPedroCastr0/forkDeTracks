@@ -8,6 +8,7 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated } = useAuth();
+  console.log("PrivateRoute: isAuthenticated =", isAuthenticated, "Path =", window.location.pathname);
 
   // Se não estiver logado, redireciona pro login e substitui o histórico
   if (!isAuthenticated) {

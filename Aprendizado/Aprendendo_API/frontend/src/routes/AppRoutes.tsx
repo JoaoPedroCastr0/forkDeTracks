@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from '../features/auth/pages/Login';
 import Register from '../features/auth/pages/Register';
 import Dashboard from '../features/tasks/pages/Dashboard';
@@ -6,8 +6,10 @@ import PrivateRoute from '../shared/components/PrivateRoute';
 import { MainLayout } from '../shared/components/Layout/MainLayout';
 
 export function AppRoutes() {
+  const location = useLocation();
+
   return (
-    <Routes>
+    <Routes key={location.pathname} location={location}>
       {/* Rotas Públicas */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

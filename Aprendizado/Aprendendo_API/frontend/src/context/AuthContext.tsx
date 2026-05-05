@@ -5,13 +5,17 @@ interface AuthContextData {
   isAuthenticated: boolean;
   login: (token?: string, userId?: string) => void;
   logout: () => void;
+  refetch: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { data, isPending } = authClient.useSession();
+  const { data, isPending, refetch } = authClient.useSession();
   
+  // LOG DE DIAGNÓSTICO: Vamos ver o que está vindo do servidor
+  console.log("Sessão Atual:", { data, isPending });
+
   const isAuthenticated = !!data?.user;
 
   // Login agora é disparado pelo Better Auth na página Login.tsx,
@@ -22,8 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     await authClient.signOut();
-    localStorage.removeItem('token'); // limpa lixo antigo
-    localStorage.removeItem('userId'); // limpa lixo antigo
+    localStorage.clear();
+    window.location.href = '/login';
   };
 
   if (isPending) {
@@ -31,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, refetch }}>
       {children}
     </AuthContext.Provider>
   );

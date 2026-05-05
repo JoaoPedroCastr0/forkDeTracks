@@ -8,7 +8,7 @@ const Dashboard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState('');
   
   const { logout } = useAuth();
@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
     setDescription(task.description || '');
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       await api.delete(`/tasks/${id}`);
       fetchTasks();
