@@ -3,7 +3,11 @@ import {
   createTaskService,
   listTasksService,
   deleteTaskService,
-  updateTaskService
+  updateTaskService,
+  listDeletedTasksService,
+  restoreTaskService,
+  permanentDeleteTaskService,
+  toggleTaskCompletionService
 } from "../services/taskService";
 import type { UpdateTaskDTO } from "@/schemas/taskSchema";
 
@@ -43,6 +47,24 @@ export async function listTasks(req: Request, res: Response) {
   }
 }
 
+export async function listDeletedTasks(req: Request, res: Response) {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+
+    const tasks = await listDeletedTasksService(userId);
+
+    return res.json(tasks);
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao listar lixeira"
+    });
+  }
+}
+
 export async function deleteTask(req: Request, res: Response) {
   try {
     const id = req.params.id;
@@ -53,10 +75,65 @@ export async function deleteTask(req: Request, res: Response) {
 
     await deleteTaskService(id as string);
 
-    return res.json({ message: "Task removida" });
+    return res.json({ message: "Task movida para a lixeira" });
   } catch (error: any) {
     return res.status(400).json({
       error: error.message || "Erro ao deletar tarefa"
+    });
+  }
+}
+
+export async function restoreTask(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    await restoreTaskService(id as string);
+
+    return res.json({ message: "Task restaurada" });
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao restaurar tarefa"
+    });
+  }
+}
+
+export async function permanentDeleteTask(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    await permanentDeleteTaskService(id as string);
+
+    return res.json({ message: "Task removida permanentemente" });
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao excluir permanentemente"
+    });
+  }
+}
+
+export async function toggleTaskCompletion(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    const { completed } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    const task = await toggleTaskCompletionService(id as string, completed);
+
+    return res.json(task);
+  } catch (error: any) {
+    return res.status(400).json({
+      error: error.message || "Erro ao alternar status da tarefa"
     });
   }
 }

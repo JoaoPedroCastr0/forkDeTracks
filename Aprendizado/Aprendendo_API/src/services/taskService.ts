@@ -24,12 +24,44 @@ export async function listTasksService(userId: string) {
   return await taskRepo.getTasksByUser(userId);
 }
 
+export async function listDeletedTasksService(userId: string) {
+  if (!userId || typeof userId !== "string") {
+    throw new Error("UserId inválido");
+  }
+
+  return await taskRepo.getDeletedTasksByUser(userId);
+}
+
 export async function deleteTaskService(id: string) {
   if (!id || typeof id !== "string") {
     throw new Error("ID inválido");
   }
 
   return await taskRepo.deleteTask(id);
+}
+
+export async function restoreTaskService(id: string) {
+  if (!id || typeof id !== "string") {
+    throw new Error("ID inválido");
+  }
+
+  return await taskRepo.restoreTask(id);
+}
+
+export async function permanentDeleteTaskService(id: string) {
+  if (!id || typeof id !== "string") {
+    throw new Error("ID inválido");
+  }
+
+  return await taskRepo.permanentDeleteTask(id);
+}
+
+export async function toggleTaskCompletionService(id: string, completed: boolean) {
+  if (!id || typeof id !== "string") {
+    throw new Error("ID inválido");
+  }
+
+  return await taskRepo.toggleTaskCompletion(id, completed);
 }
 
 export async function updateTaskService(id: string, title: string) {

@@ -70,10 +70,12 @@ model Verification {
 }
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String?
-  createdAt   DateTime @default(now())
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
 
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)

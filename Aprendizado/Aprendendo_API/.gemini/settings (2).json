@@ -1,0 +1,37 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "mcpServers": {
+    "Stitch": {
+      "httpUrl": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "YOUR_STITCH_API_KEY"
+      }
+    },
+    "React-Bit": {
+      "command": "npx",
+      "args": [
+        "shadcn@4.6.0",
+        "mcp"
+      ]
+    },
+    "Playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.71"
+      ]
+    },
+    "obsidian-vault": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\234853299\\Documents\\APRENDENDO_API"
+      ]
+    }
+  }
+}

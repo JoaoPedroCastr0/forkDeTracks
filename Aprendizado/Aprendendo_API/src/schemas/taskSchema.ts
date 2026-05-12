@@ -25,3 +25,8 @@ export const updateTaskSchema = createTaskSchema
     message: "Pelo menos um campo deve ser enviado"
   });
 export type UpdateTaskDTO = z.infer<typeof updateTaskSchema>;
+
+export const toggleTaskSchema = z.object({
+  completed: z.boolean()
+});
+export type ToggleTaskDTO = z.infer<typeof toggleTaskSchema>;
