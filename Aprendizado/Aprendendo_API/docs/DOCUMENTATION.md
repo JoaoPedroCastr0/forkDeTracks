@@ -18,22 +18,19 @@ O projeto utiliza uma arquitetura **Fullstack moderna baseada em camadas (Layere
 ### Organização de Pastas
 ```text
 /
-├── prisma/               # Configurações e esquemas do banco de dados
-├── src/                  # Código fonte do Backend
-│   ├── auth/             # Configuração do Better Auth (Server)
-│   ├── controllers/      # Lógica de entrada e resposta das rotas
-│   ├── services/         # Regras de negócio
-│   ├── repository/       # Comunicação direta com o Prisma (Acesso a dados)
-│   ├── middlewares/      # Interceptores (Auth, Erros, Validação)
-│   ├── routes/           # Definição dos endpoints
-│   ├── schemas/          # Validação de dados com Zod
-│   └── server.ts         # Ponto de entrada do servidor
+├── backend/              # Código fonte do Backend
+│   ├── prisma/           # Configurações e esquemas do banco de dados
+│   ├── src/              # Código fonte (TS)
+│   │   ├── auth/         # Configuração do Better Auth (Server)
+│   │   ├── controllers/  # Lógica de entrada e resposta
+│   │   ├── services/     # Regras de negócio
+│   │   ├── repository/   # Acesso a dados (Prisma)
+│   │   └── ...
+│   └── Dockerfile        # Configuração do container backend
 ├── frontend/             # Código fonte do Frontend (React)
-│   ├── src/
-│   │   ├── features/     # Módulos isolados por funcionalidade (auth, tasks)
-│   │   ├── shared/       # Componentes, hooks e serviços globais
-│   │   ├── routes/       # Configuração de rotas do React Router
-│   │   └── App.tsx       # Componente raiz
+│   ├── src/              # Código fonte (TSX)
+│   └── Dockerfile        # Configuração do container frontend (Nginx)
+├── docker-compose.yml    # Orquestração de toda a infra (DB, API, Web)
 └── DOCUMENTATION.md      # Esta documentação
 ```
 
@@ -119,27 +116,42 @@ A comunicação é feita via **REST API** com formato **JSON**.
 
 ## 🧪 Parte 6: Como Rodar o Projeto
 
-### Pré-requisitos
-- Bun instalado.
-- PostgreSQL rodando localmente ou via Docker.
+### Opção 1: Via Docker (Recomendado)
+Esta é a forma mais rápida de subir todo o ecossistema (Banco de Dados, API e Frontend).
 
-### Passo a Passo
-1.  **Clone o repositório** e entre na pasta.
-2.  **Configurar Variáveis de Ambiente**:
-    - Crie um arquivo `.env` na raiz (use `.env.example` como base).
-    - Configure `DATABASE_URL` e `BETTER_AUTH_SECRET`.
-3.  **Instalar Dependências**:
+**Pré-requisitos**: Docker e Docker Compose instalados.
+
+1.  **Configurar Variáveis**:
+    - Copie `backend/.env.example` para `backend/.env`.
+2.  **Subir os Containers**:
     ```bash
-    bun install
-    cd frontend && bun install
+    docker compose up --build
     ```
-4.  **Preparar o Banco de Dados**:
+3.  **Acessar**:
+    - Frontend: [http://localhost](http://localhost) (Porta 80)
+    - Backend API: [http://localhost:4000](http://localhost:4000)
+
+### Opção 2: Desenvolvimento Local (Manual)
+Útil para debugging e desenvolvimento ativo.
+
+**Pré-requisitos**: Bun instalado e PostgreSQL rodando.
+
+1.  **Instalar Dependências**:
     ```bash
-    bun prisma migrate dev
+    # Na pasta backend
+    cd backend && bun install
+    # Na pasta frontend
+    cd ../frontend && bun install
     ```
-5.  **Iniciar o Projeto**:
-    - No terminal da raiz (Backend): `bun run dev`
-    - No terminal da pasta frontend (Frontend): `bun run dev`
+2.  **Configurar Variáveis**:
+    - Crie arquivos `.env` em `backend/` conforme os exemplos.
+3.  **Preparar o Banco**:
+    ```bash
+    cd backend && bun prisma migrate dev
+    ```
+4.  **Iniciar**:
+    - Backend: `cd backend && bun run dev`
+    - Frontend: `cd frontend && bun run dev`
 
 ---
 
@@ -149,12 +161,12 @@ A comunicação é feita via **REST API** com formato **JSON**.
 - **Separação de Preocupações**: O uso de Services e Repositories facilita testes unitários.
 - **Validação**: Uso de Zod garante que dados inválidos nem cheguem à regra de negócio.
 - **Type Safety**: TypeScript de ponta a ponta.
+- **Infraestrutura**: Dockerização completa com orquestração e healthchecks.
 
 ### Sugestões de Melhoria:
 1.  **Cache**: Implementar Redis para as sessões do Better Auth em escala.
 2.  **Frontend State**: Utilizar `React Query` ou `SWR` para gerenciar o cache das tarefas no frontend, melhorando a percepção de performance.
 3.  **Testes**: Adicionar testes de integração (Supertest no backend) e E2E (Playwright no frontend).
-4.  **Dockerização**: Criar um `docker-compose.yml` para subir o PostgreSQL e a aplicação com um único comando.
 
 ---
 

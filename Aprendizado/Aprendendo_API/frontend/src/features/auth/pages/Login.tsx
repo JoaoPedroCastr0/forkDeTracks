@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authClient } from '../../../shared/services/authClient';
-import Button from '../../../shared/components/Button';
 import { useAuth } from '../../../context/AuthContext';
+import Button from '../../../shared/components/Button';
+import { authClient } from '../../../shared/services/authClient';
 
 const Login: React.FC = () => {
-
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   const { refetch } = useAuth();
   const navigate = useNavigate();
 
@@ -32,44 +31,62 @@ const Login: React.FC = () => {
       }
 
       setSuccess('Login realizado com sucesso!');
-      
+
       // Esperamos a sessão ser reconhecida pelo cliente
       await refetch();
       navigate('/dashboard');
-    } catch (err: any) {
+    } catch (_err) {
       setError('Ocorreu um erro ao conectar com o servidor.');
     }
   };
 
   return (
-    <div className="card" style={{ maxWidth: '500px', margin: '0 auto' }}>
+    <div className='card' style={{ maxWidth: '500px', margin: '0 auto' }}>
       <h2>Acessar Conta</h2>
 
-      {error && <div className="error">{error}</div>}
-      {success && <div className="success">{success}</div>}
+      {error && <div className='error'>{error}</div>}
+      {success && <div className='success'>{success}</div>}
 
       <form onSubmit={handleLogin}>
         <input
-          type="email"
-          placeholder="Seu E-mail"
+          type='email'
+          placeholder='Seu E-mail'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
-          type="password"
-          placeholder="Sua Senha"
+          type='password'
+          placeholder='Sua Senha'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <div className="actions" style={{ marginTop: '10px' }}>
-          <Button type="submit" variant="primary">Entrar</Button>
+        <div className='actions' style={{ marginTop: '10px' }}>
+          <Button type='submit' variant='primary'>
+            Entrar
+          </Button>
         </div>
       </form>
 
       <p style={{ marginTop: '15px', textAlign: 'center', fontSize: '14px' }}>
-        Não tem uma conta? <span style={{ color: '#3b82f6', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/register')}>Cadastre-se aqui</span>
+        Não tem uma conta?{' '}
+        <button
+          type='button'
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#3b82f6',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            padding: 0,
+            fontSize: 'inherit',
+            fontFamily: 'inherit',
+          }}
+          onClick={() => navigate('/register')}
+        >
+          Cadastre-se aqui
+        </button>
       </p>
     </div>
   );

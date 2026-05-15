@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.git
+.github
+biome.json
+package-lock.json
+*.md
+yarn.lock
+pnpm-lock.yaml

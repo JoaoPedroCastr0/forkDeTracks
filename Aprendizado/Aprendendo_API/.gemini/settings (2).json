@@ -13,17 +13,11 @@
     },
     "React-Bit": {
       "command": "npx",
-      "args": [
-        "shadcn@4.6.0",
-        "mcp"
-      ]
+      "args": ["shadcn@4.6.0", "mcp"]
     },
     "Playwright": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@0.0.71"
-      ]
+      "args": ["-y", "@playwright/mcp@0.0.71"]
     },
     "obsidian-vault": {
       "command": "npx",

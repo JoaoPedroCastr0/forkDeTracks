@@ -1,10 +1,15 @@
-import React from 'react';
+import type React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'warning';
 }
 
-const Button: React.FC<ButtonProps> = ({ variant = 'primary', style, children, ...props }) => {
+const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  style,
+  children,
+  ...props
+}) => {
   const baseStyle: React.CSSProperties = {
     padding: '10px 20px',
     borderRadius: '8px',
@@ -15,7 +20,10 @@ const Button: React.FC<ButtonProps> = ({ variant = 'primary', style, children, .
     transition: 'background-color 0.2s ease',
   };
 
-  const variantColors: Record<'primary' | 'secondary' | 'danger' | 'warning', string> = {
+  const variantColors: Record<
+    'primary' | 'secondary' | 'danger' | 'warning',
+    string
+  > = {
     primary: '#3b82f6',
     secondary: '#64748b',
     danger: '#ef4444',
@@ -24,7 +32,11 @@ const Button: React.FC<ButtonProps> = ({ variant = 'primary', style, children, .
 
   return (
     <button
-      style={{ ...baseStyle, backgroundColor: variantColors[variant], ...style }}
+      style={{
+        ...baseStyle,
+        backgroundColor: variantColors[variant],
+        ...style,
+      }}
       {...props}
     >
       {children}

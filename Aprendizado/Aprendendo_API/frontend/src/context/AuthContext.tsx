@@ -1,20 +1,23 @@
-import React, { createContext, useContext } from 'react';
+import type React from 'react';
+import { createContext, useContext } from 'react';
 import { authClient } from '../shared/services/authClient';
 
 interface AuthContextData {
   isAuthenticated: boolean;
   login: (token?: string, userId?: string) => void;
   logout: () => void;
-  refetch: () => Promise<any>;
+  refetch: () => Promise<unknown>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { data, isPending, refetch } = authClient.useSession();
-  
+
   // LOG DE DIAGNÓSTICO: Vamos ver o que está vindo do servidor
-  console.log("Sessão Atual:", { data, isPending });
+  console.log('Sessão Atual:', { data, isPending });
 
   const isAuthenticated = !!data?.user;
 
@@ -31,7 +34,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   if (isPending) {
-    return <div style={{ textAlign: 'center', marginTop: '50px' }}>Carregando sessão...</div>;
+    return (
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        Carregando sessão...
+      </div>
+    );
   }
 
   return (

@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.git
+.github
+*.md
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

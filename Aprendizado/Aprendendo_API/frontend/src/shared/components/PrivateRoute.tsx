@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -8,11 +8,16 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  console.log("PrivateRoute: isAuthenticated =", isAuthenticated, "Path =", window.location.pathname);
+  console.log(
+    'PrivateRoute: isAuthenticated =',
+    isAuthenticated,
+    'Path =',
+    window.location.pathname,
+  );
 
   // Se não estiver logado, redireciona pro login e substitui o histórico
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to='/login' replace />;
   }
 
   // Se estiver logado, renderiza a tela protegida
