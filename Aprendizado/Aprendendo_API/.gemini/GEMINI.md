@@ -63,7 +63,7 @@ O projeto segue arquitetura modular com separação clara entre rotas, controlle
 
 #### Ferramentas
 
-- ESLint
+- Biome.json, lint
 - TypeScript
 - Prisma CLI
 - Bun package manager
