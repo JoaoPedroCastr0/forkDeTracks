@@ -1,48 +1,126 @@
-import type { Curso } from '../models/Curso';
+import { prisma } from '../database/prisma';
 import type { AtualizarCursoDTO, CriarCursoDTO } from '../schemas/cursoSchema';
 
-// Repositório inicial (será conectado ao Prisma Client na etapa de persistência)
-const cursosDb: Curso[] = [];
+export async function criarCurso(dados: CriarCursoDTO, professorId: string) {
+  const c = await prisma.curso.create({
+    data: {
+      titulo: dados.titulo,
+      descricao: dados.descricao,
+      cargaHorariaEstimada: dados.cargaHorariaEstimada,
+      nivel: dados.nivel,
+      status: dados.status ?? 'PUBLICADO',
+      professorId,
+      trilhaId: dados.trilhaId ?? null,
+    },
+  });
 
-export async function criarCurso(dados: CriarCursoDTO, professorId: string): Promise<Curso> {
-  const novoCurso: Curso = {
-    id: `curso_${Date.now()}`,
-    titulo: dados.titulo,
-    descricao: dados.descricao,
-    cargaHorariaEstimada: dados.cargaHorariaEstimada,
-    nivel: dados.nivel,
-    status: 'RASCUNHO',
-    professorId,
-    trilhaId: dados.trilhaId ?? null,
-    dataCriacao: new Date(),
-    dataAtualizacao: new Date(),
-    dataExclusao: null,
+  return {
+    ...c,
+    modulosCount: 0,
+    aulasCount: 0,
   };
-
-  cursosDb.push(novoCurso);
-  return novoCurso;
 }
 
-export async function listarCursos(): Promise<Curso[]> {
-  return cursosDb.filter((c) => !c.dataExclusao);
+export async function listarCursos() {
+  const cursos = await prisma.curso.findMany({
+    where: {
+      deletedAt: null,
+    },
+    include: {
+      _count: {
+        select: {
+          modulos: true,
+          aulas: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return cursos.map((c) => ({
+    id: c.id,
+    titulo: c.titulo,
+    descricao: c.descricao,
+    cargaHorariaEstimada: c.cargaHorariaEstimada,
+    nivel: c.nivel,
+    status: c.status,
+    professorId: c.professorId,
+    trilhaId: c.trilhaId,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+    deletedAt: c.deletedAt,
+    modulosCount: c._count.modulos,
+    aulasCount: c._count.aulas,
+  }));
 }
 
-export async function buscarCursoPorId(id: string): Promise<Curso | null> {
-  const curso = cursosDb.find((c) => c.id === id && !c.dataExclusao);
-  return curso ?? null;
-}
+export async function buscarCursoPorId(id: string) {
+  const c = await prisma.curso.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+    },
+    include: {
+      _count: {
+        select: {
+          modulos: true,
+          aulas: true,
+        },
+      },
+    },
+  });
 
-export async function atualizarCurso(id: string, dados: AtualizarCursoDTO): Promise<Curso | null> {
-  const index = cursosDb.findIndex((c) => c.id === id && !c.dataExclusao);
-  if (index === -1) return null;
+  if (!c) return null;
 
-  const cursoExistente = cursosDb[index]!;
-  const cursoAtualizado: Curso = {
-    ...cursoExistente,
-    ...dados,
-    dataAtualizacao: new Date(),
+  return {
+    id: c.id,
+    titulo: c.titulo,
+    descricao: c.descricao,
+    cargaHorariaEstimada: c.cargaHorariaEstimada,
+    nivel: c.nivel,
+    status: c.status,
+    professorId: c.professorId,
+    trilhaId: c.trilhaId,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+    deletedAt: c.deletedAt,
+    modulosCount: c._count.modulos,
+    aulasCount: c._count.aulas,
   };
+}
 
-  cursosDb[index] = cursoAtualizado;
-  return cursoAtualizado;
+export async function atualizarCurso(id: string, dados: AtualizarCursoDTO) {
+  return await prisma.curso.update({
+    where: { id },
+    data: {
+      ...(dados.titulo !== undefined && { titulo: dados.titulo }),
+      ...(dados.descricao !== undefined && { descricao: dados.descricao }),
+      ...(dados.cargaHorariaEstimada !== undefined && {
+        cargaHorariaEstimada: dados.cargaHorariaEstimada,
+      }),
+      ...(dados.nivel !== undefined && { nivel: dados.nivel }),
+      ...(dados.status !== undefined && { status: dados.status }),
+      ...(dados.trilhaId !== undefined && { trilhaId: dados.trilhaId }),
+    },
+  });
+}
+
+export async function removerCurso(id: string) {
+  return await prisma.curso.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
+}
+
+export async function restaurarCurso(id: string) {
+  return await prisma.curso.update({
+    where: { id },
+    data: {
+      deletedAt: null,
+    },
+  });
 }

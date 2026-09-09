@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------
+// MODELO DE USUÁRIO & AUTENTICAÇÃO (BETTER AUTH)
+// ----------------------------------------------------
+
+model User {
+  id            String       @id @default(cuid())
+  name          String       @map("nome")
+  email         String       @unique
+  emailVerified Boolean      @default(false)
+  image         String?
+  senha         String?      @map("senha")
+  papel         String       @default("ALUNO") // ALUNO, PROFESSOR
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+
+  cursos        Curso[]      @relation("ProfessorCursos")
+  matriculas    Matricula[]
+  progressos    Progresso[]
+
+  @@map("usuarios")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+// ----------------------------------------------------
+// MODELOS DO DOMÍNIO DA PLATAFORMA DE ENSINO
+// ----------------------------------------------------
+
+model Trilha {
+  id        String   @id @default(cuid())
+  titulo    String
+  descricao String?
+  ordem     Int      @default(0)
+  ativa     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cursos    Curso[]
+
+  @@map("trilhas")
+}
+
+model Curso {
+  id                   String    @id @default(cuid())
+  titulo               String
+  descricao            String
+  cargaHorariaEstimada Int
+  nivel                String    @default("INICIANTE") // INICIANTE, INTERMEDIARIO, AVANCADO
+  status               String    @default("RASCUNHO") // RASCUNHO, PUBLICADO, ARQUIVADO
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  professorId          String
+  professor            User      @relation("ProfessorCursos", fields: [professorId], references: [id], onDelete: Cascade)
+
+  trilhaId             String?
+  trilha               Trilha?   @relation(fields: [trilhaId], references: [id], onDelete: SetNull)
+
+  modulos              Modulo[]
+  aulas                Aula[]
+  matriculas           Matricula[]
+  progressos           Progresso[]
+
+  @@index([professorId])
+  @@index([trilhaId])
+  @@map("cursos")
+}
+
+model Modulo {
+  id        String   @id @default(cuid())
+  titulo    String
+  descricao String?
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cursoId   String
+  curso     Curso    @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  aulas     Aula[]
+
+  @@index([cursoId])
+  @@map("modulos")
+}
+
+model Aula {
+  id             String      @id @default(cuid())
+  titulo         String
+  descricao      String?
+  urlConteudo    String
+  duracaoMinutos Int         @default(0)
+  ordem          Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  moduloId       String
+  modulo         Modulo      @relation(fields: [moduloId], references: [id], onDelete: Cascade)
+
+  cursoId        String
+  curso          Curso       @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  progressos     Progresso[]
+
+  @@index([moduloId])
+  @@index([cursoId])
+  @@map("aulas")
+}
+
+model Matricula {
+  id            String      @id @default(cuid())
+  status        String      @default("ATIVA") // ATIVA, CONCLUIDA, CANCELADA
+  dataMatricula DateTime    @default(now())
+  dataConclusao DateTime?
+
+  usuarioId     String
+  usuario       User        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cursoId       String
+  curso         Curso       @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  progressos    Progresso[]
+
+  @@unique([usuarioId, cursoId])
+  @@index([usuarioId])
+  @@index([cursoId])
+  @@map("matriculas")
+}
+
+model Progresso {
+  id            String      @id @default(cuid())
+  concluida     Boolean     @default(false)
+  dataConclusao DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  matriculaId   String
+  matricula     Matricula   @relation(fields: [matriculaId], references: [id], onDelete: Cascade)
+
+  usuarioId     String
+  usuario       User        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cursoId       String
+  curso         Curso       @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  aulaId        String
+  aula          Aula        @relation(fields: [aulaId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, aulaId])
+  @@index([usuarioId])
+  @@index([cursoId])
+  @@map("progressos")
+}

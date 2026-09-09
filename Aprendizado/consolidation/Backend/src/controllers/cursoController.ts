@@ -53,3 +53,18 @@ export async function atualizarCurso(req: Request, res: Response, next: NextFunc
     next(error);
   }
 }
+
+export async function removerCurso(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id as string;
+    const professorId = req.usuario?.id;
+    if (!professorId) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    const curso = await cursoService.removerCursoService(id, professorId);
+    return res.status(200).json({ mensagem: 'Curso removido com sucesso', curso });
+  } catch (error) {
+    next(error);
+  }
+}

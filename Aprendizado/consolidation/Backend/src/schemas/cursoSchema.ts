@@ -8,10 +8,16 @@ export type IdParamDTO = z.infer<typeof idParamSchema>;
 export const criarCursoSchema = z.object({
   titulo: z.string().min(5, 'O título deve ter no mínimo 5 caracteres'),
   descricao: z.string().min(10, 'A descrição deve ter no mínimo 10 caracteres'),
-  cargaHorariaEstimada: z.number().int().positive('A carga horária deve ser um número inteiro positivo'),
+  cargaHorariaEstimada: z
+    .number()
+    .int()
+    .positive('A carga horária deve ser um número inteiro positivo'),
   nivel: z.enum(['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'], {
-    errorMap: () => ({ message: 'Nível deve ser INICIANTE, INTERMEDIARIO ou AVANCADO' }),
+    errorMap: () => ({
+      message: 'Nível deve ser INICIANTE, INTERMEDIARIO ou AVANCADO',
+    }),
   }),
+  status: z.enum(['RASCUNHO', 'PUBLICADO', 'ARQUIVADO']).default('PUBLICADO'),
   trilhaId: z.string().optional(),
 });
 export type CriarCursoDTO = z.infer<typeof criarCursoSchema>;

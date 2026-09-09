@@ -1,1 +1,0 @@
-console.log(`Obg theo e alex`);
