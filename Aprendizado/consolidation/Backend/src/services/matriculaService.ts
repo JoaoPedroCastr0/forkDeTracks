@@ -25,13 +25,60 @@ export async function matricularAlunoService(dados: CriarMatriculaDTO, usuarioId
     if (matriculaExistente.status === 'ATIVA') {
       throw AppError.conflict('Você já possui uma matrícula ativa neste curso.');
     }
+    if (matriculaExistente.status === 'PENDENTE') {
+      throw AppError.conflict(
+        'Sua solicitação de matrícula já está aguardando confirmação do Professor Alex.',
+      );
+    }
 
-    // Se estava cancelada, reativa a matrícula
-    return await matriculaRepo.atualizarStatusMatricula(matriculaExistente.id, 'ATIVA');
+    // Se estava cancelada ou rejeitada, reabre a solicitação como PENDENTE
+    return await matriculaRepo.atualizarStatusMatricula(matriculaExistente.id, 'PENDENTE');
   }
 
-  // 3. Cria a nova matrícula
-  return await matriculaRepo.criarMatricula(usuarioId, dados.cursoId);
+  // 3. Cria a nova matrícula com status PENDENTE para confirmação do Professor
+  return await matriculaRepo.criarMatricula(usuarioId, dados.cursoId, 'PENDENTE');
+}
+
+export async function listarMatriculasPendentesService(professorId: string) {
+  if (!professorId) {
+    throw AppError.unauthorized('Usuário não autenticado.');
+  }
+
+  return await matriculaRepo.listarMatriculasPendentes();
+}
+
+export async function aprovarMatriculaService(matriculaId: string, professorId: string) {
+  if (!professorId) {
+    throw AppError.unauthorized('Usuário não autenticado.');
+  }
+
+  const matricula = await matriculaRepo.buscarMatriculaPorId(matriculaId);
+  if (!matricula) {
+    throw AppError.notFound('Matrícula não encontrada.');
+  }
+
+  if (matricula.status === 'ATIVA') {
+    throw AppError.conflict('Esta matrícula já está ativa.');
+  }
+
+  return await matriculaRepo.atualizarStatusMatricula(matricula.id, 'ATIVA');
+}
+
+export async function rejeitarMatriculaService(matriculaId: string, professorId: string) {
+  if (!professorId) {
+    throw AppError.unauthorized('Usuário não autenticado.');
+  }
+
+  const matricula = await matriculaRepo.buscarMatriculaPorId(matriculaId);
+  if (!matricula) {
+    throw AppError.notFound('Matrícula não encontrada.');
+  }
+
+  if (matricula.status === 'REJEITADA') {
+    throw AppError.conflict('Esta matrícula já foi rejeitada.');
+  }
+
+  return await matriculaRepo.atualizarStatusMatricula(matricula.id, 'REJEITADA');
 }
 
 export async function listarMinhasMatriculasService(usuarioId: string) {

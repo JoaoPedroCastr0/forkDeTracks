@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Sparkles, ArrowRight, ShieldCheck, Zap, Code2, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,13 +37,17 @@ export function HeroSection({ totalCursos }: HeroSectionProps) {
 
         {/* Botões de Ação */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Button size="lg" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-500/25">
-            Explorar Cursos
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-          <Button size="lg" variant="outline" className="border-zinc-300 dark:border-zinc-700">
-            Conhecer as Trilhas
-          </Button>
+          <Link href="/#cursos">
+            <Button size="lg" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-500/25">
+              Explorar Cursos
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/#trilhas">
+            <Button size="lg" variant="outline" className="border-zinc-300 dark:border-zinc-700">
+              Conhecer as Trilhas
+            </Button>
+          </Link>
         </div>
 
         {/* Cards de Métricas em Destaque */}
@@ -62,6 +67,62 @@ export function HeroSection({ totalCursos }: HeroSectionProps) {
           <div className="rounded-xl border border-zinc-200/80 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/70">
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">Bun</div>
             <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Alta Performance</div>
+          </div>
+        </div>
+
+        {/* Filosofia Pedagógica Central: Aprender -> Construir -> Evoluir */}
+        <div className="mt-16 text-left">
+          <div className="text-center mb-8">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              Filosofia Pedagógica
+            </h2>
+            <p className="mt-1 text-xl font-extrabold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
+              Aprender → Construir → Evoluir
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-zinc-200/80 bg-white/80 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm">
+                  1
+                </div>
+                <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100">
+                  Aprender
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Aulas diretas com o Professor, foco em conceitos essenciais e objetivos claros de domínio para cada aula, sem enrolação.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200/80 bg-white/80 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm">
+                  2
+                </div>
+                <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100">
+                  Construir
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Desafios práticos interativos em cada aula, comandos para testar no seu terminal local e cultura do erro como ferramenta de raciocínio.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200/80 bg-white/80 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-bold text-sm">
+                  3
+                </div>
+                <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100">
+                  Evoluir
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Conexão contínua com projetos reais da trilha, níveis de maestria e competências sólidas de arquitetura de software profissional.
+              </p>
+            </div>
           </div>
         </div>
       </div>

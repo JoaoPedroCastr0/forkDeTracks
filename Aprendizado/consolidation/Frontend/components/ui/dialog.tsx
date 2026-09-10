@@ -38,13 +38,13 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       />
 
       {/* Conteúdo Central */}
-      <div className="relative z-50 w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl animate-in zoom-in-95 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="relative z-50 w-full max-w-lg max-h-[90vh] flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-2xl animate-in zoom-in-95 dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden">
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-md p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+          className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 transition-colors z-10"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
           <span className="sr-only">Fechar</span>
         </button>
         {children}

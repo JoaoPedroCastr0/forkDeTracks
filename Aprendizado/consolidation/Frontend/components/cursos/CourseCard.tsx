@@ -31,7 +31,9 @@ export function CourseCard({ curso, matricula, onVerConteudo }: CourseCardProps)
         ? 'info'
         : 'warning';
 
-  const isMatriculado = !!matricula && matricula.status !== 'CANCELADA';
+  const isAtivo = !!matricula && (matricula.status === 'ATIVA' || matricula.status === 'CONCLUIDA');
+  const isPendente = matricula?.status === 'PENDENTE';
+  const isRejeitado = matricula?.status === 'REJEITADA';
   const isConcluido = matricula?.status === 'CONCLUIDA' || matricula?.percentualProgresso === 100;
 
   return (
@@ -46,7 +48,7 @@ export function CourseCard({ curso, matricula, onVerConteudo }: CourseCardProps)
             <Badge variant={badgeVariant} className="font-semibold uppercase tracking-wider text-[10px]">
               {curso.nivel}
             </Badge>
-            {isMatriculado && (
+            {isAtivo && (
               <Badge
                 variant={isConcluido ? 'success' : 'default'}
                 className={`text-[10px] font-bold uppercase ${
@@ -56,6 +58,22 @@ export function CourseCard({ curso, matricula, onVerConteudo }: CourseCardProps)
                 }`}
               >
                 {isConcluido ? 'Concluído' : `${matricula.percentualProgresso}%`}
+              </Badge>
+            )}
+            {isPendente && (
+              <Badge
+                variant="warning"
+                className="text-[10px] font-bold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+              >
+                Em Análise
+              </Badge>
+            )}
+            {isRejeitado && (
+              <Badge
+                variant="destructive"
+                className="text-[10px] font-bold uppercase bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+              >
+                Recusada
               </Badge>
             )}
           </div>
@@ -78,7 +96,7 @@ export function CourseCard({ curso, matricula, onVerConteudo }: CourseCardProps)
         </CardDescription>
 
         {/* Barra de Progresso do Aluno */}
-        {isMatriculado && (
+        {isAtivo && (
           <div className="space-y-1.5 pt-1">
             <div className="flex justify-between text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
               <span>Seu Progresso</span>
@@ -111,13 +129,23 @@ export function CourseCard({ curso, matricula, onVerConteudo }: CourseCardProps)
       <CardFooter className="pt-2">
         <Button
           className={`w-full justify-between transition-colors ${
-            isMatriculado
+            isAtivo
               ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-              : 'bg-zinc-900 text-white hover:bg-indigo-600 dark:bg-zinc-800 dark:hover:bg-indigo-600'
+              : isPendente
+                ? 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
+                : 'bg-zinc-900 text-white hover:bg-indigo-600 dark:bg-zinc-800 dark:hover:bg-indigo-600'
           }`}
         >
-          <span>{isMatriculado ? 'Continuar Aulas' : 'Ver Conteúdo'}</span>
-          {isMatriculado ? (
+          <span>
+            {isAtivo
+              ? 'Continuar Aulas'
+              : isPendente
+                ? 'Matrícula em Análise'
+                : isRejeitado
+                  ? 'Ver Detalhes / Reenviar'
+                  : 'Ver Conteúdo'}
+          </span>
+          {isAtivo ? (
             <PlayCircle className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           ) : (
             <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

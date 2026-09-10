@@ -15,3 +15,12 @@ export async function cadastrarUsuario(req: Request, res: Response, next: NextFu
     next(error);
   }
 }
+
+export async function obterListaAlunos(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const alunos = await usuarioService.listarAlunosService();
+    return res.status(200).json(alunos);
+  } catch (error) {
+    next(error);
+  }
+}

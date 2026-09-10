@@ -14,15 +14,70 @@ export async function buscarMatricula(usuarioId: string, cursoId: string) {
   });
 }
 
-export async function criarMatricula(usuarioId: string, cursoId: string) {
+export async function buscarMatriculaPorId(id: string) {
+  return await prisma.matricula.findUnique({
+    where: { id },
+    include: {
+      usuario: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      curso: {
+        select: {
+          id: true,
+          titulo: true,
+          nivel: true,
+          professorId: true,
+        },
+      },
+    },
+  });
+}
+
+export async function criarMatricula(
+  usuarioId: string,
+  cursoId: string,
+  status: string = 'PENDENTE',
+) {
   return await prisma.matricula.create({
     data: {
       usuarioId,
       cursoId,
-      status: 'ATIVA',
+      status,
     },
     include: {
       curso: true,
+    },
+  });
+}
+
+export async function listarMatriculasPendentes() {
+  return await prisma.matricula.findMany({
+    where: {
+      status: 'PENDENTE',
+    },
+    include: {
+      usuario: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      curso: {
+        select: {
+          id: true,
+          titulo: true,
+          nivel: true,
+          professorId: true,
+        },
+      },
+    },
+    orderBy: {
+      dataMatricula: 'desc',
     },
   });
 }

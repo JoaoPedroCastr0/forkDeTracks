@@ -49,7 +49,7 @@ export default function LoginPage() {
         router.push('/');
         router.refresh();
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = await extrairMensagemErro(err, 'Não foi possível autenticar no momento. Por favor, tente novamente mais tarde.');
       setErro(msg);
     } finally {

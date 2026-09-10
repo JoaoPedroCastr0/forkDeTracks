@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, BookOpen, GraduationCap } from 'lucide-react';
-import type { Curso, NivelCurso } from '@/types';
+import type { Curso, NivelCurso, ItemMatricula } from '@/types';
+import { obterPapelUsuario } from '@/types';
 import { CourseCard, type MatriculaResumo } from './CourseCard';
 import { CourseDetailsModal } from './CourseDetailsModal';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function CourseGrid({ cursosIniciais }: CourseGridProps) {
   const { data: session } = useSession();
-  const isAluno = (session?.user as any)?.papel === 'ALUNO';
+  const papel = obterPapelUsuario(session?.user);
+  const isAluno = papel === 'ALUNO';
 
   const [busca, setBusca] = useState('');
   const [nivelSelecionado, setNivelSelecionado] = useState<NivelCurso | 'TODOS'>('TODOS');
@@ -41,7 +43,7 @@ export function CourseGrid({ cursosIniciais }: CourseGridProps) {
           credentials: 'include',
         });
         if (res.ok && !cancelado) {
-          const data: any[] = await res.json();
+          const data = (await res.json()) as ItemMatricula[];
           const mapa: Record<string, MatriculaResumo> = {};
           for (const item of data) {
             if (item.curso?.id) {

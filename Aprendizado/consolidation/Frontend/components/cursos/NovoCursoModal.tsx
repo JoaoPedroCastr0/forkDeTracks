@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 import { extrairMensagemErro } from '@/lib/tratarErroApi';
+import type { NivelCurso } from '@/types';
 
 interface NovoCursoModalProps {
   open: boolean;
@@ -87,7 +88,7 @@ export function NovoCursoModal({ open, onOpenChange, onCursoCriado }: NovoCursoM
           router.push(`/cursos/${novoCurso.id}`);
         }
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = await extrairMensagemErro(err);
       setErro(msg);
     } finally {
@@ -169,8 +170,8 @@ export function NovoCursoModal({ open, onOpenChange, onCursoCriado }: NovoCursoM
             </label>
             <select
               value={nivel}
-              onChange={(e) => setNivel(e.target.value as any)}
-              className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
+              onChange={(e) => setNivel(e.target.value as NivelCurso)}
+              className="flex h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="INICIANTE">Iniciante</option>
               <option value="INTERMEDIARIO">Intermediário</option>

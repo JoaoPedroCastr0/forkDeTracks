@@ -29,3 +29,16 @@ export async function criarUsuario(dados: CriarUsuarioDbInput): Promise<User> {
     },
   });
 }
+
+export async function listarAlunos() {
+  return await prisma.user.findMany({
+    where: { papel: 'ALUNO' },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+    },
+    orderBy: { name: 'asc' },
+  });
+}

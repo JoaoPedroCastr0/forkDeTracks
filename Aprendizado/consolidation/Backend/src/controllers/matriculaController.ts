@@ -1,5 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { CriarMatriculaDTO, CursoIdParamDTO } from '../schemas/matriculaSchema';
+import type {
+  CriarMatriculaDTO,
+  CursoIdParamDTO,
+  MatriculaIdParamDTO,
+} from '../schemas/matriculaSchema';
 import * as matriculaService from '../services/matriculaService';
 import { AppError } from '../utils/AppError';
 
@@ -14,7 +18,59 @@ export async function matricular(req: Request, res: Response, next: NextFunction
     const matricula = await matriculaService.matricularAlunoService(dados, usuarioId);
 
     return res.status(201).json({
-      mensagem: 'Matrícula realizada com sucesso.',
+      mensagem: 'Solicitação de matrícula enviada. Aguardando confirmação do Professor Alex.',
+      matricula,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listarMatriculasPendentes(req: Request, res: Response, next: NextFunction) {
+  try {
+    const professorId = req.usuario?.id;
+    if (!professorId) {
+      throw AppError.unauthorized();
+    }
+
+    const pendentes = await matriculaService.listarMatriculasPendentesService(professorId);
+    return res.status(200).json(pendentes);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function aprovarMatricula(req: Request, res: Response, next: NextFunction) {
+  try {
+    const professorId = req.usuario?.id;
+    if (!professorId) {
+      throw AppError.unauthorized();
+    }
+
+    const params = req.params as MatriculaIdParamDTO;
+    const matricula = await matriculaService.aprovarMatriculaService(params.id, professorId);
+
+    return res.status(200).json({
+      mensagem: 'Matrícula confirmada com sucesso.',
+      matricula,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function rejeitarMatricula(req: Request, res: Response, next: NextFunction) {
+  try {
+    const professorId = req.usuario?.id;
+    if (!professorId) {
+      throw AppError.unauthorized();
+    }
+
+    const params = req.params as MatriculaIdParamDTO;
+    const matricula = await matriculaService.rejeitarMatriculaService(params.id, professorId);
+
+    return res.status(200).json({
+      mensagem: 'Matrícula recusada pelo Professor.',
       matricula,
     });
   } catch (error) {

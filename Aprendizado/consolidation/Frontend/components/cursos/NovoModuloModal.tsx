@@ -76,7 +76,7 @@ export function NovoModuloModal({
         setOrdem(1);
         onOpenChange(false);
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = await extrairMensagemErro(err);
       setErro(msg);
     } finally {

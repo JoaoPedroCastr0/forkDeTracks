@@ -1,80 +1,46 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  CheckCircle2,
-  Circle,
-  PlayCircle,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
   Trophy,
   AlertCircle,
+  Clock,
   Loader2,
   Layers,
   Plus,
-  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { extrairMensagemErro } from '@/lib/tratarErroApi';
 import { useSession } from '@/lib/auth-client';
 import { NovoModuloModal } from '@/components/cursos/NovoModuloModal';
 import { NovaAulaModal } from '@/components/cursos/NovaAulaModal';
-
-interface Aula {
-  id: string;
-  titulo: string;
-  descricao?: string;
-  urlConteudo: string;
-  duracaoMinutos: number;
-  ordem: number;
-  concluida: boolean;
-}
-
-interface Modulo {
-  id: string;
-  titulo: string;
-  descricao?: string;
-  ordem: number;
-  aulas: Aula[];
-}
-
-interface ConteudoCurso {
-  curso: {
-    id: string;
-    titulo: string;
-    descricao: string;
-    nivel: string;
-    cargaHorariaEstimada: number;
-  };
-  modulos: Modulo[];
-  progresso: {
-    totalAulas: number;
-    aulasConcluidas: number;
-    percentualProgresso: number;
-    cursoConcluido: boolean;
-  };
-}
+import { LessonHeader } from '@/components/cursos/LessonHeader';
+import { LessonPlayer } from '@/components/cursos/LessonPlayer';
+import { LessonSidebar } from '@/components/cursos/LessonSidebar';
+import {
+  type ConteudoCursoDetalhado,
+  type AulaConteudo,
+  obterPapelUsuario,
+} from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function SalaDeAulaPage() {
   const params = useParams();
-  const router = useRouter();
   const cursoId = params?.id as string;
   const { data: session } = useSession();
 
-  const isProfessor = (session?.user as any)?.papel === 'PROFESSOR';
+  const papel = obterPapelUsuario(session?.user);
+  const isProfessor = papel === 'PROFESSOR';
 
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const [conteudo, setConteudo] = useState<ConteudoCurso | null>(null);
+  const [erroAcao, setErroAcao] = useState<string | null>(null);
+  const [conteudo, setConteudo] = useState<ConteudoCursoDetalhado | null>(null);
   const [aulaAtivaId, setAulaAtivaId] = useState<string | null>(null);
   const [atualizandoProgresso, setAtualizandoProgresso] = useState(false);
   const [versao, setVersao] = useState(0);
@@ -104,7 +70,7 @@ export default function SalaDeAulaPage() {
           throw new Error(msg);
         }
 
-        const data: ConteudoCurso = await res.json();
+        const data: ConteudoCursoDetalhado = await res.json();
         if (!cancelado) {
           setConteudo(data);
 
@@ -116,7 +82,7 @@ export default function SalaDeAulaPage() {
             return primeiraPendente ? primeiraPendente.id : todas[0]?.id || null;
           });
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (!cancelado) {
           const msg = await extrairMensagemErro(err);
           setErro(msg);
@@ -138,29 +104,33 @@ export default function SalaDeAulaPage() {
     return conteudo ? conteudo.modulos.flatMap((m) => m.aulas) : [];
   }, [conteudo]);
 
-  const indiceAulaAtiva = useMemo(() => {
-    return todasAulas.findIndex((a) => a.id === aulaAtivaId);
+  // Aula atualmente selecionada
+  const aulaAtiva: AulaConteudo | undefined = useMemo(() => {
+    if (!aulaAtivaId) return todasAulas[0];
+    return todasAulas.find((a) => a.id === aulaAtivaId) || todasAulas[0];
   }, [todasAulas, aulaAtivaId]);
 
-  const aulaAtiva = useMemo(() => {
-    return todasAulas.find((a) => a.id === aulaAtivaId) || null;
-  }, [todasAulas, aulaAtivaId]);
-
+  // Módulo ao qual a aula ativa pertence
   const moduloDaAulaAtiva = useMemo(() => {
     if (!conteudo || !aulaAtiva) return null;
-    return conteudo.modulos.find((m) => m.aulas.some((a) => a.id === aulaAtiva.id)) || null;
+    return conteudo.modulos.find((m) => m.aulas.some((a) => a.id === aulaAtiva.id));
   }, [conteudo, aulaAtiva]);
 
-  const modulosOptions = useMemo(() => {
-    return conteudo ? conteudo.modulos.map((m) => ({ id: m.id, titulo: m.titulo })) : [];
-  }, [conteudo]);
+  // Índice para botões Anterior / Próxima
+  const indiceAulaAtiva = useMemo(() => {
+    if (!aulaAtiva) return -1;
+    return todasAulas.findIndex((a) => a.id === aulaAtiva.id);
+  }, [todasAulas, aulaAtiva]);
 
-  // Alternar conclusão da aula (concluir ou desmarcar) — exclusivo para o Aluno
+  // Alterna o status de conclusão da aula
   const handleToggleConclusao = async () => {
-    if (!aulaAtiva || atualizandoProgresso || isProfessor) return;
+    if (!aulaAtiva || isProfessor || atualizandoProgresso) return;
 
     setAtualizandoProgresso(true);
-    const metodo = aulaAtiva.concluida ? 'DELETE' : 'POST';
+    setErroAcao(null);
+
+    const proximoStatusConcluida = !aulaAtiva.concluida;
+    const metodo = proximoStatusConcluida ? 'POST' : 'DELETE';
 
     try {
       const res = await fetch(`${API_BASE_URL}/aulas/${aulaAtiva.id}/concluir`, {
@@ -173,36 +143,51 @@ export default function SalaDeAulaPage() {
         throw new Error(msg);
       }
 
-      const resData = await res.json();
+      const resData = (await res.json()) as {
+        estatisticas?: {
+          totalAulas: number;
+          aulasConcluidas: number;
+          percentual: number;
+          cursoConcluido: boolean;
+        };
+      };
 
-      // Atualiza o estado local de forma reativa
+      // Atualiza o estado local de forma imutável
       setConteudo((prev) => {
-        if (!prev) return prev;
+        if (!prev) return null;
 
-        const novosModulos = prev.modulos.map((modulo) => ({
-          ...modulo,
-          aulas: modulo.aulas.map((aula) => {
-            if (aula.id === aulaAtiva.id) {
-              return { ...aula, concluida: !aula.concluida };
-            }
-            return aula;
-          }),
+        const novosModulos = prev.modulos.map((mod) => ({
+          ...mod,
+          aulas: mod.aulas.map((a) =>
+            a.id === aulaAtiva.id ? { ...a, concluida: proximoStatusConcluida } : a,
+          ),
         }));
+
+        const total = prev.progresso.totalAulas;
+        const concluidas = proximoStatusConcluida
+          ? Math.min(total, prev.progresso.aulasConcluidas + 1)
+          : Math.max(0, prev.progresso.aulasConcluidas - 1);
+
+        const percentual =
+          resData.estatisticas?.percentual ?? (total > 0 ? Math.round((concluidas / total) * 100) : 0);
+
+        const concluido =
+          resData.estatisticas?.cursoConcluido ?? (total > 0 && concluidas === total);
 
         return {
           ...prev,
           modulos: novosModulos,
           progresso: {
-            totalAulas: resData.estatisticas.totalAulas,
-            aulasConcluidas: resData.estatisticas.aulasConcluidas,
-            percentualProgresso: resData.estatisticas.percentual,
-            cursoConcluido: resData.estatisticas.cursoConcluido,
+            totalAulas: total,
+            aulasConcluidas: concluidas,
+            percentualProgresso: percentual,
+            cursoConcluido: concluido,
           },
         };
       });
-    } catch (err) {
+    } catch (err: unknown) {
       const msg = await extrairMensagemErro(err);
-      alert(msg);
+      setErroAcao(msg);
     } finally {
       setAtualizandoProgresso(false);
     }
@@ -210,13 +195,15 @@ export default function SalaDeAulaPage() {
 
   const irParaAulaAnterior = () => {
     if (indiceAulaAtiva > 0) {
-      setAulaAtivaId(todasAulas[indiceAulaAtiva - 1].id);
+      const aulaAnterior = todasAulas[indiceAulaAtiva - 1];
+      if (aulaAnterior) setAulaAtivaId(aulaAnterior.id);
     }
   };
 
   const irParaProximaAula = () => {
     if (indiceAulaAtiva < todasAulas.length - 1) {
-      setAulaAtivaId(todasAulas[indiceAulaAtiva + 1].id);
+      const proximaAula = todasAulas[indiceAulaAtiva + 1];
+      if (proximaAula) setAulaAtivaId(proximaAula.id);
     }
   };
 
@@ -232,14 +219,34 @@ export default function SalaDeAulaPage() {
   }
 
   if (erro || !conteudo) {
+    const isPendenteMsg = erro?.toLowerCase().includes('aguardando confirmação') || erro?.toLowerCase().includes('pendente');
+    const isRecusadaMsg = erro?.toLowerCase().includes('recusada') || erro?.toLowerCase().includes('rejeitada');
+
     return (
       <div className="container mx-auto max-w-2xl px-4 py-20 text-center">
-        <div className="rounded-2xl border border-red-500/20 bg-red-50/50 p-8 dark:bg-red-950/20">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+        <div
+          className={`rounded-2xl border p-8 ${
+            isPendenteMsg
+              ? 'border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20'
+              : isRecusadaMsg
+                ? 'border-red-500/30 bg-red-50/60 dark:bg-red-950/20'
+                : 'border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50'
+          }`}
+        >
+          {isPendenteMsg ? (
+            <Clock className="mx-auto h-12 w-12 text-amber-500 mb-4 animate-pulse" />
+          ) : (
+            <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          )}
+
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-            Acesso Restrito ao Conteúdo
+            {isPendenteMsg
+              ? 'Matrícula em Análise'
+              : isRecusadaMsg
+                ? 'Matrícula Não Confirmada'
+                : 'Acesso Restrito ao Conteúdo'}
           </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6 max-w-md mx-auto leading-relaxed">
             {erro || 'Não foi possível carregar o conteúdo deste curso.'}
           </p>
           <Link href="/">
@@ -253,75 +260,22 @@ export default function SalaDeAulaPage() {
     );
   }
 
+  const modulosOptions = conteudo.modulos.map((m) => ({ id: m.id, titulo: m.titulo }));
+
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      {/* Barra Superior da Sala de Aula */}
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
-        <div className="container mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center space-x-3">
-            <Link
-              href="/"
-              className="inline-flex items-center text-xs font-semibold text-zinc-500 hover:text-indigo-600 transition-colors"
-            >
-              <ArrowLeft className="mr-1.5 h-4 w-4" />
-              Catálogo
-            </Link>
-            <span className="text-zinc-300 dark:text-zinc-700">|</span>
-            <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate max-w-[220px] sm:max-w-md">
-              {conteudo.curso.titulo}
-            </span>
-          </div>
-
-          {/* Ações contextuais no topo */}
-          {isProfessor ? (
-            <div className="flex items-center space-x-2">
-              <Badge variant="warning" className="text-[10px] uppercase font-bold py-0.5 px-2">
-                <ShieldCheck className="mr-1 h-3 w-3" />
-                Modo Professor
-              </Badge>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setModalNovoModuloAberto(true)}
-                className="h-8 text-xs font-semibold border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300"
-              >
-                <Plus className="mr-1 h-3.5 w-3.5" />
-                Módulo
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => {
-                  setModuloSelecionadoParaAula(null);
-                  setModalNovaAulaAberto(true);
-                }}
-                disabled={conteudo.modulos.length === 0}
-                className="h-8 bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-semibold"
-              >
-                <Plus className="mr-1 h-3.5 w-3.5" />
-                Aula
-              </Button>
-            </div>
-          ) : (
-            /* Barra de Progresso no Topo para Aluno */
-            <div className="flex items-center space-x-3">
-              <div className="hidden sm:flex flex-col text-right">
-                <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-300">
-                  {conteudo.progresso.percentualProgresso}% concluído
-                </span>
-                <span className="text-[10px] text-zinc-400">
-                  {conteudo.progresso.aulasConcluidas} de {conteudo.progresso.totalAulas} aulas
-                </span>
-              </div>
-              <div className="w-24 sm:w-36 h-2 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 transition-all duration-300"
-                  style={{ width: `${conteudo.progresso.percentualProgresso}%` }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
+      {/* Barra Superior Modular */}
+      <LessonHeader
+        cursoTitulo={conteudo.curso.titulo}
+        isProfessor={isProfessor}
+        progresso={conteudo.progresso}
+        onCriarModulo={() => setModalNovoModuloAberto(true)}
+        onCriarAula={() => {
+          setModuloSelecionadoParaAula(null);
+          setModalNovaAulaAberto(true);
+        }}
+        temModulos={conteudo.modulos.length > 0}
+      />
 
       {/* Conteúdo Principal: Player + Sidebar de Aulas */}
       <main className="container mx-auto max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
@@ -342,118 +296,22 @@ export default function SalaDeAulaPage() {
         )}
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Coluna da Esquerda (2/3): Player de Vídeo e Material da Aula */}
+          {/* Coluna da Esquerda (2/3): Player e Material da Aula */}
           <div className="lg:col-span-2 space-y-6">
             {aulaAtiva ? (
-              <>
-                {/* Player de Conteúdo / Vídeo */}
-                <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-black shadow-lg dark:border-zinc-800">
-                  <div className="relative aspect-video w-full">
-                    {aulaAtiva.urlConteudo.includes('youtube.com') ||
-                    aulaAtiva.urlConteudo.includes('youtu.be') ? (
-                      <iframe
-                        src={
-                          aulaAtiva.urlConteudo.includes('watch?v=')
-                            ? aulaAtiva.urlConteudo.replace('watch?v=', 'embed/')
-                            : aulaAtiva.urlConteudo
-                        }
-                        title={aulaAtiva.titulo}
-                        className="h-full w-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-zinc-900 text-zinc-400 text-sm">
-                        <PlayCircle className="mr-2 h-8 w-8 text-indigo-500" />
-                        <span>Visualizador de Conteúdo: {aulaAtiva.titulo}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Barra de Ações da Aula */}
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                      {moduloDaAulaAtiva?.titulo || 'Módulo do Curso'}
-                    </span>
-                    <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                      {aulaAtiva.titulo}
-                    </h1>
-                    <div className="flex items-center space-x-3 text-xs text-zinc-500">
-                      <span className="flex items-center">
-                        <Clock className="mr-1 h-3.5 w-3.5" />
-                        {aulaAtiva.duracaoMinutos} minutos
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Ação de Conclusão para Aluno ou Badge para Professor */}
-                  {isProfessor ? (
-                    <Badge variant="warning" className="text-xs px-3 py-1.5 font-bold uppercase tracking-wider">
-                      <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                      Visualização do Administrador
-                    </Badge>
-                  ) : (
-                    <Button
-                      onClick={handleToggleConclusao}
-                      disabled={atualizandoProgresso}
-                      variant={aulaAtiva.concluida ? 'outline' : 'default'}
-                      className={
-                        aulaAtiva.concluida
-                          ? 'border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
-                          : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      }
-                    >
-                      {atualizandoProgresso ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : aulaAtiva.concluida ? (
-                        <CheckCircle2 className="mr-1.5 h-4 w-4 text-emerald-600" />
-                      ) : (
-                        <Circle className="mr-1.5 h-4 w-4" />
-                      )}
-                      <span>{aulaAtiva.concluida ? 'Aula Concluída' : 'Marcar como Concluída'}</span>
-                    </Button>
-                  )}
-                </div>
-
-                {/* Navegação entre aulas */}
-                <div className="flex items-center justify-between pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={irParaAulaAnterior}
-                    disabled={indiceAulaAtiva <= 0}
-                  >
-                    <ChevronLeft className="mr-1 h-4 w-4" />
-                    Aula Anterior
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={irParaProximaAula}
-                    disabled={indiceAulaAtiva >= todasAulas.length - 1}
-                  >
-                    Próxima Aula
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Descrição e Orientações do Professor */}
-                {aulaAtiva.descricao && (
-                  <Card className="border-zinc-200 dark:border-zinc-800">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                        Orientações e Material de Apoio
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
-                      {aulaAtiva.descricao}
-                    </CardContent>
-                  </Card>
-                )}
-              </>
+              <LessonPlayer
+                aula={aulaAtiva}
+                moduloTitulo={moduloDaAulaAtiva?.titulo}
+                isProfessor={isProfessor}
+                atualizandoProgresso={atualizandoProgresso}
+                onToggleConclusao={handleToggleConclusao}
+                temAulaAnterior={indiceAulaAtiva > 0}
+                temProximaAula={indiceAulaAtiva < todasAulas.length - 1}
+                onAulaAnterior={irParaAulaAnterior}
+                onProximaAula={irParaProximaAula}
+                erroAcao={erroAcao}
+                onLimparErroAcao={() => setErroAcao(null)}
+              />
             ) : (
               <div className="rounded-2xl border border-dashed border-zinc-300 p-12 text-center text-zinc-500 dark:border-zinc-800">
                 {isProfessor ? (
@@ -497,113 +355,18 @@ export default function SalaDeAulaPage() {
             )}
           </div>
 
-          {/* Coluna da Direita (1/3): Módulos e Ementa do Curso */}
-          <div className="space-y-4">
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-              <div className="flex items-center justify-between mb-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-3">
-                <div className="flex items-center space-x-2">
-                  <Layers className="h-4 w-4 text-indigo-600" />
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                    Conteúdo do Curso
-                  </h3>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-zinc-500">
-                    {conteudo.modulos.length} módulos
-                  </span>
-                  {isProfessor && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setModalNovoModuloAberto(true)}
-                      className="h-6 px-2 text-[10px] text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-bold"
-                    >
-                      <Plus className="mr-0.5 h-3 w-3" />
-                      Módulo
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Lista de Módulos e Aulas */}
-              <div className="space-y-4">
-                {conteudo.modulos.length === 0 ? (
-                  <p className="text-xs text-zinc-400 text-center py-4">
-                    Nenhum módulo adicionado.
-                  </p>
-                ) : (
-                  conteudo.modulos.map((modulo, modIdx) => (
-                    <div key={modulo.id} className="space-y-2">
-                      <div className="flex items-center justify-between text-xs font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 rounded-lg">
-                        <span className="truncate mr-2">
-                          Módulo {modIdx + 1}: {modulo.titulo}
-                        </span>
-                        <div className="flex items-center space-x-1.5 shrink-0">
-                          <span className="text-[10px] text-zinc-400 font-normal">
-                            {modulo.aulas.length} aulas
-                          </span>
-                          {isProfessor && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setModuloSelecionadoParaAula(modulo.id);
-                                setModalNovaAulaAberto(true);
-                              }}
-                              className="h-5 px-1.5 text-[9px] text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100/50 font-semibold"
-                            >
-                              <Plus className="mr-0.5 h-2.5 w-2.5" />
-                              Aula
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-1 pl-1">
-                        {modulo.aulas.length === 0 ? (
-                          <p className="text-[11px] text-zinc-400 py-1 pl-3 italic">
-                            Nenhuma aula neste módulo.
-                          </p>
-                        ) : (
-                          modulo.aulas.map((aula) => {
-                            const isAtiva = aula.id === aulaAtivaId;
-
-                            return (
-                              <button
-                                key={aula.id}
-                                type="button"
-                                onClick={() => setAulaAtivaId(aula.id)}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left text-xs transition-all ${
-                                  isAtiva
-                                    ? 'bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
-                                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
-                                }`}
-                              >
-                                <div className="flex items-center space-x-2.5 truncate mr-2">
-                                  {aula.concluida ? (
-                                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                                  ) : isAtiva ? (
-                                    <PlayCircle className="h-4 w-4 text-indigo-600 shrink-0" />
-                                  ) : (
-                                    <Circle className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
-                                  )}
-                                  <span className="truncate">{aula.titulo}</span>
-                                </div>
-
-                                <span className="text-[10px] text-zinc-400 shrink-0">
-                                  {aula.duracaoMinutos}m
-                                </span>
-                              </button>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
+          {/* Coluna da Direita (1/3): Sidebar de Módulos */}
+          <LessonSidebar
+            modulos={conteudo.modulos}
+            aulaAtivaId={aulaAtivaId}
+            onSelecionarAula={(id) => setAulaAtivaId(id)}
+            isProfessor={isProfessor}
+            onCriarModulo={() => setModalNovoModuloAberto(true)}
+            onCriarAulaNoModulo={(moduloId) => {
+              setModuloSelecionadoParaAula(moduloId);
+              setModalNovaAulaAberto(true);
+            }}
+          />
         </div>
       </main>
 

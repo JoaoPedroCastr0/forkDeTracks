@@ -11,3 +11,9 @@ export const cursoIdParamSchema = z.object({
 });
 
 export type CursoIdParamDTO = z.infer<typeof cursoIdParamSchema>;
+
+export const matriculaIdParamSchema = z.object({
+  id: z.string().min(1, 'O ID da matrícula é obrigatório'),
+});
+
+export type MatriculaIdParamDTO = z.infer<typeof matriculaIdParamSchema>;

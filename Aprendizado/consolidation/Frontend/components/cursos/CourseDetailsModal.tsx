@@ -14,7 +14,8 @@ import {
   ArrowRight,
   Loader2,
 } from 'lucide-react';
-import type { Curso } from '@/types';
+import type { Curso, ItemMatricula } from '@/types';
+import { obterPapelUsuario } from '@/types';
 import {
   Dialog,
   DialogHeader,
@@ -40,18 +41,19 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
   const { data: session } = useSession();
 
   const [carregando, setCarregando] = useState(false);
-  const [matriculado, setMatriculado] = useState(false);
+  const [statusMatricula, setStatusMatricula] = useState<string | null>(null);
   const [verificandoMatricula, setVerificandoMatricula] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
 
-  const isProfessor = (session?.user as any)?.papel === 'PROFESSOR';
-  const isAluno = (session?.user as any)?.papel === 'ALUNO';
+  const papel = obterPapelUsuario(session?.user);
+  const isProfessor = papel === 'PROFESSOR';
+  const isAluno = papel === 'ALUNO';
 
-  // Verifica se o aluno já possui matrícula ativa neste curso
+  // Verifica o status da matrícula do aluno neste curso
   useEffect(() => {
     if (!open || !curso || !isAluno) {
-      setMatriculado(false);
+      setStatusMatricula(null);
       setErro(null);
       setSucesso(false);
       return;
@@ -66,11 +68,13 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
           credentials: 'include',
         });
         if (res.ok && !cancelado) {
-          const matriculas: any[] = await res.json();
-          const jaMatriculado = matriculas.some(
-            (m) => m.curso.id === curso?.id && m.status !== 'CANCELADA',
-          );
-          setMatriculado(jaMatriculado);
+          const matriculas = (await res.json()) as ItemMatricula[];
+          const mat = matriculas.find((m) => m.curso.id === curso?.id);
+          if (mat && mat.status !== 'CANCELADA') {
+            setStatusMatricula(mat.status);
+          } else {
+            setStatusMatricula(null);
+          }
         }
       } catch {
         // Falha silenciosa de verificação
@@ -86,7 +90,7 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
     };
   }, [open, curso, isAluno]);
 
-  // Ação de envio: Realizar Matrícula no Curso
+  // Ação de envio: Solicitar Matrícula no Curso
   const handleMatricular = async () => {
     if (!curso) return;
 
@@ -112,14 +116,8 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
       }
 
       setSucesso(true);
-      setMatriculado(true);
+      setStatusMatricula('PENDENTE');
       router.refresh();
-
-      // Redireciona o aluno diretamente para a sala de aula do curso
-      setTimeout(() => {
-        onOpenChange(false);
-        router.push(`/cursos/${curso.id}`);
-      }, 1200);
     } catch (err) {
       const msg = await extrairMensagemErro(err);
       setErro(msg);
@@ -151,10 +149,24 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
             </span>
           </div>
 
-          {matriculado && (
+          {statusMatricula === 'ATIVA' && (
             <Badge variant="success" className="text-[11px] font-semibold flex items-center">
               <CheckCircle2 className="mr-1 h-3 w-3" />
               Matriculado
+            </Badge>
+          )}
+
+          {statusMatricula === 'PENDENTE' && (
+            <Badge variant="warning" className="text-[11px] font-semibold flex items-center">
+              <Clock className="mr-1 h-3 w-3" />
+              Aguardando Aprovação
+            </Badge>
+          )}
+
+          {statusMatricula === 'REJEITADA' && (
+            <Badge variant="destructive" className="text-[11px] font-semibold flex items-center">
+              <AlertCircle className="mr-1 h-3 w-3" />
+              Matrícula Recusada
             </Badge>
           )}
         </div>
@@ -170,9 +182,11 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
       <div className="space-y-4 py-2">
         {/* Notificação de Sucesso */}
         {sucesso && (
-          <div className="flex items-center space-x-2 rounded-lg border border-emerald-500/20 bg-emerald-50 p-3 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-            <span>Parabéns! Sua matrícula foi confirmada. Bons estudos!</span>
+          <div className="flex items-center space-x-2 rounded-lg border border-amber-500/20 bg-amber-50 p-3 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            <Clock className="h-4 w-4 shrink-0 text-amber-600 animate-pulse" />
+            <span>
+              Sua solicitação de matrícula foi enviada com sucesso! O Professor Alex foi notificado e irá analisar sua entrada no curso.
+            </span>
           </div>
         )}
 
@@ -238,7 +252,7 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
             <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
           </Button>
         ) : isAluno ? (
-          matriculado ? (
+          statusMatricula === 'ATIVA' ? (
             <Button
               size="sm"
               onClick={() => {
@@ -250,6 +264,34 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
               <span>Continuar Aulas</span>
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
             </Button>
+          ) : statusMatricula === 'PENDENTE' ? (
+            <Button
+              size="sm"
+              disabled
+              className="bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800 cursor-not-allowed opacity-90"
+            >
+              <Clock className="mr-1.5 h-3.5 w-3.5 animate-pulse text-amber-600" />
+              <span>Aguardando Confirmação do Professor</span>
+            </Button>
+          ) : statusMatricula === 'REJEITADA' ? (
+            <Button
+              size="sm"
+              onClick={handleMatricular}
+              disabled={carregando || verificandoMatricula}
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              {carregando ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  <span>Enviando Solicitação...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                  <span>Solicitar Matrícula Novamente</span>
+                </>
+              )}
+            </Button>
           ) : (
             <Button
               size="sm"
@@ -260,12 +302,12 @@ export function CourseDetailsModal({ curso, open, onOpenChange }: CourseDetailsM
               {carregando ? (
                 <>
                   <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                  <span>Confirmando Matrícula...</span>
+                  <span>Enviando Solicitação...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                  <span>Matricular-se no Curso</span>
+                  <span>Solicitar Matrícula no Curso</span>
                 </>
               )}
             </Button>

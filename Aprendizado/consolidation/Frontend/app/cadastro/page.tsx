@@ -58,9 +58,10 @@ export default function CadastroPage() {
 
       if (signUpError) {
         let msg = signUpError.message || 'Falha ao realizar cadastro.';
+        const errObj = signUpError as { code?: string; message?: string };
         if (
           msg.toLowerCase().includes('short') ||
-          (signUpError as any)?.code === 'PASSWORD_TOO_SHORT'
+          errObj.code === 'PASSWORD_TOO_SHORT'
         ) {
           msg = 'A senha é muito curta. Digite no mínimo 8 caracteres.';
         } else if (msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('duplicate')) {
@@ -74,7 +75,7 @@ export default function CadastroPage() {
       setTimeout(() => {
         router.push('/login');
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = await extrairMensagemErro(err, 'Não foi possível completar seu cadastro no momento. Por favor, tente novamente mais tarde.');
       setErro(msg);
     } finally {

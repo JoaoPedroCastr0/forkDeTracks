@@ -30,6 +30,12 @@ export async function obterConteudoCursoService(
         'Você precisa estar matriculado neste curso para acessar suas aulas.',
       );
     }
+    if (matricula.status === 'PENDENTE') {
+      throw AppError.forbidden('Sua matrícula está aguardando confirmação do Professor Alex.');
+    }
+    if (matricula.status === 'REJEITADA') {
+      throw AppError.forbidden('Sua solicitação de matrícula foi recusada pelo Professor.');
+    }
   }
 
   // Busca o progresso do usuário no curso

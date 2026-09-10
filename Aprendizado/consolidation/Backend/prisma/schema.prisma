@@ -24,9 +24,10 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  cursos        Curso[]      @relation("ProfessorCursos")
-  matriculas    Matricula[]
-  progressos    Progresso[]
+  cursos                Curso[]      @relation("ProfessorCursos")
+  matriculas            Matricula[]
+  progressos            Progresso[]
+  trilhasPersonalizadas Trilha[]     @relation("AlunoTrilhas")
 
   @@map("usuarios")
 }
@@ -91,8 +92,12 @@ model Trilha {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  alunoId   String?  @map("aluno_id")
+  aluno     User?    @relation("AlunoTrilhas", fields: [alunoId], references: [id], onDelete: SetNull)
+
   cursos    Curso[]
 
+  @@index([alunoId])
   @@map("trilhas")
 }
 

@@ -8,19 +8,38 @@ import {
   removerCurso,
 } from '../controllers/cursoController';
 import {
+  aprovarMatricula,
   cancelarMatricula,
+  listarMatriculasPendentes,
   listarMinhasMatriculas,
   matricular,
+  rejeitarMatricula,
 } from '../controllers/matriculaController';
 import { concluirAula, desmarcarAula, obterProgresso } from '../controllers/progressoController';
-import { cadastrarUsuario } from '../controllers/usuarioController';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import {
+  atualizarTrilha,
+  criarTrilha,
+  desativarTrilha,
+  listarTrilhas,
+  obterTrilhaPorId,
+} from '../controllers/trilhaController';
+import { cadastrarUsuario, obterListaAlunos } from '../controllers/usuarioController';
+import { authMiddleware, optionalAuthMiddleware } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/role.middleware';
 import { validate } from '../middlewares/validate.middleware';
 import { criarAulaSchema, criarModuloSchema } from '../schemas/aulaSchema';
 import { atualizarCursoSchema, criarCursoSchema, idParamSchema } from '../schemas/cursoSchema';
-import { criarMatriculaSchema, cursoIdParamSchema } from '../schemas/matriculaSchema';
+import {
+  criarMatriculaSchema,
+  cursoIdParamSchema,
+  matriculaIdParamSchema,
+} from '../schemas/matriculaSchema';
 import { aulaIdParamSchema } from '../schemas/progressoSchema';
+import {
+  atualizarTrilhaSchema,
+  criarTrilhaSchema,
+  trilhaIdParamSchema,
+} from '../schemas/trilhaSchema';
 import { criarUsuarioSchema } from '../schemas/usuarioSchema';
 
 const routes = Router();
@@ -45,9 +64,45 @@ routes.get('/health', (_req, res) => {
 });
 
 //----------------------------------------------------------------//
-// Rotas de Usuários / Cadastro
+// Rotas de Usuários / Cadastro e Gestão
 //----------------------------------------------------------------//
 routes.post('/usuarios', validate({ body: criarUsuarioSchema }), cadastrarUsuario);
+routes.get('/alunos', authMiddleware, requireRole('PROFESSOR'), obterListaAlunos);
+
+//----------------------------------------------------------------//
+// Rotas de Trilhas de Estudo
+//----------------------------------------------------------------//
+routes.get('/trilhas', optionalAuthMiddleware, listarTrilhas);
+routes.get(
+  '/trilhas/:id',
+  optionalAuthMiddleware,
+  validate({ params: trilhaIdParamSchema }),
+  obterTrilhaPorId,
+);
+
+routes.post(
+  '/trilhas',
+  authMiddleware,
+  requireRole('PROFESSOR'),
+  validate({ body: criarTrilhaSchema }),
+  criarTrilha,
+);
+
+routes.put(
+  '/trilhas/:id',
+  authMiddleware,
+  requireRole('PROFESSOR'),
+  validate({ params: trilhaIdParamSchema, body: atualizarTrilhaSchema }),
+  atualizarTrilha,
+);
+
+routes.delete(
+  '/trilhas/:id',
+  authMiddleware,
+  requireRole('PROFESSOR'),
+  validate({ params: trilhaIdParamSchema }),
+  desativarTrilha,
+);
 
 //----------------------------------------------------------------//
 // Rotas de Cursos (Catálogo Geral)
@@ -109,11 +164,35 @@ routes.post(
 );
 
 //----------------------------------------------------------------//
-// Rotas do Aluno: Matrículas
+//----------------------------------------------------------------//
+// Rotas de Matrículas (Aluno e Professor)
 //----------------------------------------------------------------//
 routes.post('/matriculas', authMiddleware, validate({ body: criarMatriculaSchema }), matricular);
 
 routes.get('/matriculas/minhas', authMiddleware, listarMinhasMatriculas);
+
+routes.get(
+  '/matriculas/pendentes',
+  authMiddleware,
+  requireRole('PROFESSOR'),
+  listarMatriculasPendentes,
+);
+
+routes.patch(
+  '/matriculas/:id/aprovar',
+  authMiddleware,
+  requireRole('PROFESSOR'),
+  validate({ params: matriculaIdParamSchema }),
+  aprovarMatricula,
+);
+
+routes.patch(
+  '/matriculas/:id/rejeitar',
+  authMiddleware,
+  requireRole('PROFESSOR'),
+  validate({ params: matriculaIdParamSchema }),
+  rejeitarMatricula,
+);
 
 routes.delete(
   '/matriculas/:cursoId',

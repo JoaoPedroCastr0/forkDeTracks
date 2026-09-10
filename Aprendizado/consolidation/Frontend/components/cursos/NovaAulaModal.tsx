@@ -111,7 +111,7 @@ export function NovaAulaModal({
         setOrdem(1);
         onOpenChange(false);
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = await extrairMensagemErro(err);
       setErro(msg);
     } finally {
@@ -156,7 +156,7 @@ export function NovaAulaModal({
             onChange={(e) => setModuloId(e.target.value)}
             disabled={carregando}
             required
-            className="flex h-10 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+            className="flex h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
           >
             {modulos.length === 0 && (
               <option value="">Nenhum módulo cadastrado. Crie um módulo primeiro.</option>

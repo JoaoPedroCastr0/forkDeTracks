@@ -1,6 +1,22 @@
-import type { Curso } from '@/types';
+import type { Curso, Trilha } from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+export async function buscarTrilhas(): Promise<Trilha[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/trilhas`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      throw new Error(`Falha ao buscar trilhas: ${res.statusText}`);
+    }
+    const data: Trilha[] = await res.json();
+    return data;
+  } catch (error) {
+    console.warn('Backend offline ou erro ao buscar trilhas:', error);
+    return [];
+  }
+}
 
 export async function buscarCursos(): Promise<Curso[]> {
   try {

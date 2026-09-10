@@ -1,23 +1,65 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Layers, Sparkles, Terminal, LogOut, PlusCircle, User, ShieldCheck } from 'lucide-react';
+import {
+  BookOpen,
+  Layers,
+  Sparkles,
+  Terminal,
+  LogOut,
+  PlusCircle,
+  User,
+  ShieldCheck,
+  Bell,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSession, signOut } from '@/lib/auth-client';
+import { obterPapelUsuario, type MatriculaPendente } from '@/types';
 import { NovoCursoModal } from '@/components/cursos/NovoCursoModal';
+import { NovaTrilhaModal } from '@/components/cursos/NovaTrilhaModal';
+import { AprovacoesMatriculaModal } from '@/components/cursos/AprovacoesMatriculaModal';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function Navbar() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [modalNovoCursoAberto, setModalNovoCursoAberto] = useState(false);
+  const [modalNovaTrilhaAberto, setModalNovaTrilhaAberto] = useState(false);
+  const [modalAprovacoesAberto, setModalAprovacoesAberto] = useState(false);
+  const [totalPendentes, setTotalPendentes] = useState(0);
   const [saindo, setSaindo] = useState(false);
 
   const usuario = session?.user;
-  const isProfessor = (usuario as any)?.papel === 'PROFESSOR';
-  const isAluno = (usuario as any)?.papel === 'ALUNO';
+  const papel = obterPapelUsuario(usuario);
+  const isProfessor = papel === 'PROFESSOR';
+  const isAluno = papel === 'ALUNO';
+
+  const checarPendencias = useCallback(async () => {
+    if (!isProfessor) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/matriculas/pendentes`, {
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data: MatriculaPendente[] = await res.json();
+        setTotalPendentes(data.length);
+      }
+    } catch {
+      // Falha silenciosa
+    }
+  }, [isProfessor]);
+
+  useEffect(() => {
+    checarPendencias();
+    if (isProfessor) {
+      const interval = setInterval(checarPendencias, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isProfessor, checarPendencias]);
 
   const handleSignOut = async () => {
     try {
@@ -51,14 +93,14 @@ export function Navbar() {
           {/* Links Centrais */}
           <nav className="hidden items-center space-x-8 md:flex">
             <Link
-              href="/"
+              href="/#cursos"
               className="flex items-center space-x-1.5 text-sm font-medium text-zinc-700 transition-colors hover:text-indigo-600 dark:text-zinc-300 dark:hover:text-indigo-400"
             >
               <BookOpen className="h-4 w-4" />
               <span>Cursos</span>
             </Link>
             <Link
-              href="#trilhas"
+              href="/#trilhas"
               className="flex items-center space-x-1.5 text-sm font-medium text-zinc-700 transition-colors hover:text-indigo-600 dark:text-zinc-300 dark:hover:text-indigo-400"
             >
               <Layers className="h-4 w-4" />
@@ -91,16 +133,50 @@ export function Navbar() {
                   </div>
                 </div>
 
-                {/* Ação específica do Professor: Criar Novo Curso */}
+                {/* Notificações de Matrícula para o Professor Alex */}
                 {isProfessor && (
-                  <Button
-                    size="sm"
-                    onClick={() => setModalNovoCursoAberto(true)}
-                    className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20 text-xs font-semibold"
+                  <button
+                    type="button"
+                    onClick={() => setModalAprovacoesAberto(true)}
+                    className="relative p-2 rounded-lg text-zinc-600 hover:text-indigo-600 hover:bg-indigo-50 dark:text-zinc-400 dark:hover:text-indigo-400 dark:hover:bg-zinc-800 transition-colors"
+                    title={
+                      totalPendentes > 0
+                        ? `${totalPendentes} solicitação(ões) de matrícula pendente(s)`
+                        : 'Nenhuma solicitação de matrícula pendente'
+                    }
+                    aria-label="Solicitações de Matrícula"
                   >
-                    <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
-                    Novo Curso
-                  </Button>
+                    <Bell className="h-4 w-4" />
+                    {totalPendentes > 0 && (
+                      <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white shadow-sm animate-pulse">
+                        {totalPendentes}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {/* Ações específicas do Professor: Criar Nova Trilha e Novo Curso */}
+                {isProfessor && (
+                  <div className="flex items-center space-x-1.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setModalNovaTrilhaAberto(true)}
+                      className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950/50 text-xs font-semibold"
+                    >
+                      <Layers className="mr-1.5 h-3.5 w-3.5" />
+                      Nova Trilha
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => setModalNovoCursoAberto(true)}
+                      className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20 text-xs font-semibold"
+                    >
+                      <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
+                      Novo Curso
+                    </Button>
+                  </div>
                 )}
 
                 {/* Botão Sair */}
@@ -142,15 +218,34 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Modal de Publicação de Novo Curso (Disponível para o Professor) */}
+      {/* Modais Administrativos para o Professor */}
       {isProfessor && (
-        <NovoCursoModal
-          open={modalNovoCursoAberto}
-          onOpenChange={setModalNovoCursoAberto}
-          onCursoCriado={() => {
-            router.refresh();
-          }}
-        />
+        <>
+          <NovoCursoModal
+            open={modalNovoCursoAberto}
+            onOpenChange={setModalNovoCursoAberto}
+            onCursoCriado={() => {
+              router.refresh();
+            }}
+          />
+
+          <NovaTrilhaModal
+            open={modalNovaTrilhaAberto}
+            onOpenChange={setModalNovaTrilhaAberto}
+            onTrilhaCriada={() => {
+              router.refresh();
+            }}
+          />
+
+          <AprovacoesMatriculaModal
+            open={modalAprovacoesAberto}
+            onOpenChange={setModalAprovacoesAberto}
+            onAtualizado={() => {
+              checarPendencias();
+              router.refresh();
+            }}
+          />
+        </>
       )}
     </>
   );
